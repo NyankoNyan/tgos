@@ -4,16 +4,15 @@ import curses
 def main(stdscr):
     curses.start_color()
     curses.use_default_colors()
-    for i in range(0, curses.COLORS):
-        curses.init_pair(i + 1, i, -1)
     try:
-        for i in range(0, 255):
-            stdscr.addstr("COL " + str(i) + "\t", curses.color_pair(i))
+        for i in range(0, 256):
+            curses.init_pair(i, i, 0)
+            stdscr.addstr(" COL ", curses.color_pair(i) | curses.A_REVERSE | curses.A_BLINK)
+            stdscr.addstr(str(i).center(5), curses.color_pair(i) | curses.A_ITALIC | curses.A_BOLD | curses.A_LOW | curses.A_UNDERLINE)
     except:
         # End of screen reached
         pass
     stdscr.getch()
-
 
 if __name__ == "__main__":
     curses.wrapper(main)

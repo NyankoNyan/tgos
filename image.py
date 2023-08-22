@@ -76,7 +76,7 @@ class Image(object):
         if raw_layer == None:
             return None
         else:
-            return list(l for l in raw_layer.split("\n")[1:-1])
+            return list(l.rstrip(' ') for l in raw_layer.split("\n")[1:-1])
 
     def _calc_x_size(self) -> int:
         return max(self._calc_layer_x_size(self.main_layer),

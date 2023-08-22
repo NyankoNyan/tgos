@@ -1,4 +1,5 @@
 from image import Image
+import color
 
 grass_1 = Image(
     size_x=5,
@@ -12,7 +13,7 @@ grass_1 = Image(
  111
 """,
     color_map={
-        "1": "green"
+        "1": color.GREEN
     }
 )
 
@@ -38,8 +39,8 @@ ggggggggggggg
    bbbbbbb
 """,
     color_map={
-        "g":"green",
-        "b":"brown"
+        "g": color.GREEN,
+        "b": color.BROWN
     },
-    default_color="black"
+    default_color=color.BLACK
 )
