@@ -1,6 +1,8 @@
+from . import color
+
 default_color_map = {
-    "0": "black",
-    "1": "white"
+    "0": color.BLACK,
+    "1": color.WHITE
 }
 
 
@@ -13,7 +15,12 @@ class SymbolInfo(object):
         "bg_color"
     ]
 
-    def __init__(self, alpha, symbol, color, bg_alpha, bg_color) -> None:
+    def __init__(self,
+                 alpha=False,
+                 symbol=' ',
+                 color=color.WHITE,
+                 bg_alpha=True,
+                 bg_color=color.BLACK) -> None:
         self.alpha = alpha
         self.symbol = symbol
         self.color = color

@@ -4,7 +4,7 @@ import tgos.color as color
 import ascii_sprites.grass as grass
 from ascii_sprites.bigsymb import shadow
 
-class GameContext(AppContext):
+class DemoContext(AppContext):
     def _custom_init(self):
         self.frame_counter = 0
         tree_sprite = Sprite(grass.tree_1, Vector2(.5, 0))
@@ -18,9 +18,10 @@ class GameContext(AppContext):
                                                Vector3(20, 10, -999)))
 
 
-class GameApp(App):
+class DemoApp(App):
     def _user_update(self):
         context = self.context
+        context.frame_counter += 1
         stage_val = context.frame_counter * math.pi / 18
         # stage = math.sin(context.frame_counter * math.pi / 18)
         center = (context.scr_size[0] // 2, context.scr_size[1] // 2)
@@ -44,4 +45,4 @@ class GameApp(App):
 
 
 if __name__ == "__main__":
-    GameApp(GameContext).start()
+    DemoApp(DemoContext).start()

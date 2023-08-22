@@ -1,6 +1,7 @@
 import curses
 from .sceneobject import SceneObject
 
+
 class AppContext:
     def __init__(self, stdscr: curses.window) -> None:
         self.stdscr = stdscr
@@ -12,10 +13,13 @@ class AppContext:
         self.color_buffer = []
         self.symbol_buffer = []
         self.scene_objects = set()
+        self.tickable_objects = set()
         self._custom_init()
 
     def instaniate(self, scene_obj: SceneObject = SceneObject()) -> SceneObject:
         self.scene_objects.add(scene_obj)
+        if getattr(scene_obj, "tick"):
+            self.tickable_objects.add(scene_obj)
         return scene_obj
 
     def _custom_init(self):

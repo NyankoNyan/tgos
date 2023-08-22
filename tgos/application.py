@@ -2,6 +2,7 @@ import os
 import curses
 from . import color
 import math
+import time
 from .appcontext import AppContext
 from .common_types import Vector2
 from .image import Image, SymbolInfo
@@ -9,9 +10,13 @@ from .image import Image, SymbolInfo
 curses_color_map = {
     color.WHITE: curses.COLOR_WHITE,
     color.BLACK: curses.COLOR_BLACK,
-    color.BROWN: 52,
-    color.GREEN: 28,
-    color.RED: 1
+    color.BROWN: 166,
+    color.GREEN: 46,
+    color.RED: 196,
+    color.YELLOW: 227,
+    color.MAGENTA: 165,
+    color.CYAN: 123,
+    color.PINK: 207
 }
 
 
@@ -22,8 +27,9 @@ class App(object):
     def __init__(self, contextClass: AppContext) -> None:
         self.contextClass = contextClass
         self.context = contextClass
+        self.last_timer = time.time()
 
-    def start(self):        
+    def start(self):
         os.environ.setdefault("ESCDELAY", "25")
         curses.wrapper(self.__main)
 
@@ -61,11 +67,19 @@ class App(object):
 
     def __update_all(self):
         context = self.context
-        context.frame_counter += 1
         if (context.key in (27, 275)):
             context.exit = True
 
+        self.__send_tick()
         self._user_update()
+
+    def __send_tick(self):
+        curr_timer = time.time()
+        delta = curr_timer - self.last_timer
+        if delta > 0:
+            self.last_timer = curr_timer
+            for o in self.context.tickable_objects:
+                o.tick(delta)
 
     def _user_update(self):
         pass
