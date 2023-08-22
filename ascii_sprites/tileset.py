@@ -1,5 +1,5 @@
-import color
-from image import Image
+import tgos.color as color
+from tgos import Image
 
 tiles = {
     "hero": Image(

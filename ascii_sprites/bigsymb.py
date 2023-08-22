@@ -8,7 +8,7 @@ https://web.archive.org/web/20120819044459/http://www.roysac.com/thedrawfonts-td
 FIGFont created with: http://patorjk.com/figfont-editor
 """
 
-from image import Image
+from tgos import Image
 
 
 shadow = {

@@ -1,14 +1,8 @@
 import math
-from application import App
+from tgos import App, Vector2, Vector3, Sprite, SceneObject, Font, TextObject, AppContext
+import tgos.color as color
 import ascii_sprites.grass as grass
-from common_types import Vector2, Vector3
-from sprite import Sprite
-from sceneobject import SceneObject
-import color
-from textobject import Font, TextObject
 from ascii_sprites.bigsymb import shadow
-from appcontext import AppContext
-
 
 class GameContext(AppContext):
     def _custom_init(self):

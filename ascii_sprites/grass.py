@@ -1,5 +1,5 @@
-from image import Image
-import color
+from tgos import Image
+import tgos.color as color
 
 grass_1 = Image(
     size_x=5,
