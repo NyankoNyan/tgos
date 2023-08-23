@@ -14,21 +14,22 @@ class DemoContext(AppContext):
             math.radians(110), math.radians(160))
 
     def __get_ps(self):
-        return ParticleSystem(ch=".",
-                              coord=Vector3(0, 0, 0),
-                              emit_zone=RoundEmitZone(
-                                  center=Vector2(5, 5),
-                                  radius=2,
-                                  ellipse_mod=Vector2(1, 0.5)
-                              ),
-                              speed=Vector2(15, 30),
-                              gravity=Vector2(0, -8),
-                              emit_per_sec=0,
-                              life_time=5,
-                              emit_actions=[
-                                  EmitAction(.1, 20)
-                              ],
-                              circle_length=3)
+        return ParticleSystem(
+            ch=".",
+            coord=Vector3(0, 0, 0),
+            emit_zone=RoundEmitZone(
+                center=Vector2(5, 5),
+                radius=2,
+                ellipse_mod=Vector2(1, 0.5)
+            ),
+            speed=Vector2(15, 30),
+            gravity=Vector2(0, -8),
+            emit_per_sec=0,
+            life_time=5,
+            emit_actions=[
+                EmitAction(.1, 20)
+            ],
+            circle_length=3)
 
 
 class DemoApp(App):
