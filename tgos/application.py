@@ -17,7 +17,9 @@ curses_color_map = {
     color.MAGENTA: 165,
     color.CYAN: 123,
     color.PINK: 207,
-    color.BLUE: 27
+    color.BLUE: 27,
+    color.GRAY: 245,
+    color.DARK_GRAY: 233
 }
 
 

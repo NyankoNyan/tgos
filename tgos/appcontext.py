@@ -22,6 +22,8 @@ class AppContext:
         scene_obj.context = self
         if self.__is_tickable(scene_obj):
             self.tickable_objects.add(scene_obj)
+        if hasattr(scene_obj, "start"):
+            scene_obj.start()
         return scene_obj
 
     def destroy(self, scene_obj: SceneObject) -> None:
@@ -38,4 +40,4 @@ class AppContext:
         pass
 
     def __is_tickable(self, obj):
-        return getattr(obj, "tick")
+        return hasattr(obj, "tick")

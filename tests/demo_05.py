@@ -2,9 +2,11 @@ from __future__ import absolute_import
 from tgos import *
 import ascii_sprites.actors as actors
 import ascii_sprites.bullets as bullets
+import ascii_sprites.side_tiles as side_tiles
 from tgos.common_types import Vector3
 from tgos.sprite import Sprite
 import curses
+from tgos.tilebuilder import default_usage as test_tiles
 
 
 class Hero(SceneObject):
@@ -16,8 +18,8 @@ class Hero(SceneObject):
 
     ATACK_TIME = 0.3
     STEP_LENGTH = 3
-    MISSILE_R_OFFSET = Vector3(4, 1, 0)
-    MISSILE_L_OFFSET = Vector3(-6, 1, 0)
+    MISSILE_R_OFFSET = Vector3(5, 2, 0)
+    MISSILE_L_OFFSET = Vector3(-5, 2, 0)
 
     def __init__(self, coord: Vector3 = ...) -> None:
         super().__init__(None, coord)
@@ -113,12 +115,33 @@ class Bullet(SceneObject):
 
 class DemoContext(AppContext):
     def _custom_init(self):
-        self.instaniate(Hero(coord=Vector3(20, 3, 0)))
+        self.hero = self.instaniate(Hero(coord=Vector3(20, 12, 1)))
+        # platforms = Sprite.sprityfy(side_tiles.platforms, Vector2(.5, 0))
+        # n = 8
+        # for i in range(n):
+        #     coord = Vector3(5+i*5, 1, 0)
+        #     if i == 0:
+        #         sprite = platforms["left"]
+        #     elif i == n-1:
+        #         sprite = platforms["right"]
+        #     else:
+        #         sprite = platforms["center"]
+        #     self.instaniate(SceneObject(sprite=sprite, coord=coord))
+        test_tiles.coord = Vector3(5, 1, 0)
+        self.instaniate(
+            test_tiles
+        )
 
 
 class DemoApp(App):
     def _user_update(self):
         pass
+
+    # def _user_draw(self, draw_callback):
+    #     draw_callback(
+    #         self.context.hero.coord,
+    #         SymbolInfo(symbol="H")
+    #     )
 
 
 if __name__ == "__main__":

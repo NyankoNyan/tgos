@@ -15,4 +15,5 @@ from .sceneobject import SceneObject
 from .sprite import Sprite
 from .textobject import Font, TextObject
 from .particlesystem import *
+from .tilebuilder import TileBuilder
 from . import support

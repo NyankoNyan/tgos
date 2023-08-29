@@ -19,10 +19,10 @@ images = {
   └ └
 """,
         bg_layer="""
- 11111
- 11111
- 11111
- 11111
+ 
+  111
+  111
+ 
 
 """,
         color_map=hero_color_map
@@ -36,10 +36,10 @@ images = {
   ┘ ┘
 """,
         bg_layer="""
- 11111
- 11111
- 11111
- 11111
+ 
+  111
+  111
+  
 
 """,
         color_map=hero_color_map
@@ -53,10 +53,10 @@ images = {
   └ └
 """,
         bg_layer="""
- 11111
- 11111
- 11111
- 11111
+ 
+  111
+  111
+ 
 
 """,
         color_map=hero_color_map
@@ -70,10 +70,10 @@ images = {
     ┘ ┘
 """,
         bg_layer="""
-   11111
-   11111
-   11111
-   11111
+
+    111
+    111
+
 
  """,
         color_map=hero_color_map

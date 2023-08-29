@@ -12,4 +12,5 @@ class SceneObject(object):
         self.context: tgos.appcontext.AppContext = None
 
     def draw(self, draw_callback):
-        self.sprite.draw(self.coord.v2, draw_callback)
+        if self.sprite is not None:
+            self.sprite.draw(self.coord.v2, draw_callback)

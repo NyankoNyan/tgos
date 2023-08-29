@@ -1,4 +1,6 @@
+from __future__ import annotations
 from . import color
+from . import symbmap
 
 default_color_map = {
     "0": color.BLACK,
@@ -50,9 +52,9 @@ class Image(object):
 
         assert (main_layer != None)
 
-        self.main_layer = self._raw_layer_to_list(main_layer)
-        self.color_layer = self._raw_layer_to_list(color_layer)
-        self.bg_layer = self._raw_layer_to_list(bg_layer)
+        self.main_layer = symbmap.raw_layer_to_list(main_layer)
+        self.color_layer = symbmap.raw_layer_to_list(color_layer)
+        self.bg_layer = symbmap.raw_layer_to_list(bg_layer)
         self.color_map = color_map
         self.default_color = default_color
 
@@ -78,45 +80,23 @@ class Image(object):
         assert (self.size_x > 0)
         assert (self.size_y > 0)
 
-    @staticmethod
-    def _raw_layer_to_list(raw_layer: str) -> list:
-        if raw_layer == None:
-            return None
-        else:
-            return list(l.rstrip(' ') for l in raw_layer.split("\n")[1:-1])
-
     def _calc_x_size(self) -> int:
-        return max(self._calc_layer_x_size(self.main_layer),
-                   self._calc_layer_x_size(self.bg_layer),
-                   self._calc_layer_x_size(self.color_layer))
-
-    @staticmethod
-    def _calc_layer_x_size(layer: list) -> int:
-        max_len = 0
-        if layer != None:
-            for line in layer:
-                max_len = max(max_len, len(line))
-        return max_len
+        return max(symbmap.calc_layer_x_size(self.main_layer),
+                   symbmap.calc_layer_x_size(self.bg_layer),
+                   symbmap.calc_layer_x_size(self.color_layer))
 
     def _calc_y_size(self) -> int:
         lens = []
-        lens.append(self._calc_layer_y_size(self.main_layer))
+        lens.append(symbmap.calc_layer_y_size(self.main_layer))
         if self.bg_layer != None:
-            lens.append(self._calc_layer_y_size(self.bg_layer))
+            lens.append(symbmap.calc_layer_y_size(self.bg_layer))
         if self.color_layer != None:
-            lens.append(self._calc_layer_y_size(self.color_layer))
+            lens.append(symbmap.calc_layer_y_size(self.color_layer))
         max_len = max(lens)
         min_len = min(lens)
         if max_len != min_len:
             raise Exception("Variuos layer height")
         return max_len
-
-    @staticmethod
-    def _calc_layer_y_size(layer: list) -> int:
-        if layer == None:
-            return 0
-        else:
-            return len(layer)
 
     def get_char(self, x: int, y: int) -> SymbolInfo:
         """
@@ -127,35 +107,33 @@ class Image(object):
         bgalpha = True
         bgcolor = self.default_color
 
-        _, symbol = self._get_layer_char(self.main_layer, x, y)
+        _, symbol = symbmap.get_layer_char(self.main_layer, x, y)
         if symbol != ' ':
             alpha = False
 
         if self.color_layer != None:
-            _, colorch = self._get_layer_char(self.color_layer, x, y)
+            _, colorch = symbmap.get_layer_char(self.color_layer, x, y)
             if colorch != ' ':
                 color = self._map_color(colorch)
                 alpha = False
 
         if self.bg_layer != None:
-            _, colorch = self._get_layer_char(self.bg_layer, x, y)
+            _, colorch = symbmap.get_layer_char(self.bg_layer, x, y)
             if colorch != ' ':
                 bgcolor = self._map_color(colorch)
                 bgalpha = False
 
         return SymbolInfo(alpha, symbol, color, bgalpha, bgcolor)
 
-    @staticmethod
-    def _get_layer_char(layer: list, x: str, y: str) -> list:
-        if y < 0 or y >= len(layer):
-            return (False, ' ')
-        line = layer[y]
-        if x < 0 or x >= len(line):
-            return (False, ' ')
-        return (True, line[x])
-
     def _map_color(self, color: str) -> str:
         try:
             return self.color_map[color]
         except:
             return self.default_color
+
+    @staticmethod
+    def apply(imgs: [str, 'Image'], color_map: [str, str] = None) -> [str, 'Image']:
+        for _, img in imgs.items():
+            if color_map is not None:
+                img.color_map = color_map
+        return imgs
