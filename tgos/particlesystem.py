@@ -9,6 +9,9 @@ from . import color
 from .image import SymbolInfo
 from . import support
 
+LIFE_END_STOP = "stop"
+LIFE_END_DESTROY = "destroy"
+
 
 class Particle(object):
     __slots__ = ["coord", "death_time", "active", "speed"]
@@ -52,7 +55,7 @@ class RectEmitZone(EmitZone):
 
 class RoundEmitZone(EmitZone):
     def __init__(self,
-                 center: Vector2,
+                 center: Vector2 = Vector2(0, 0),
                  radius: float = 0,
                  ellipse_mod: Vector2 = Vector2(1, 1),
                  angle_limit: Vector2 = None) -> None:
@@ -79,7 +82,9 @@ class ParticleSystem(SceneObject):
                  ch: str,
                  emit_zone: EmitZone,
                  coord: Vector3 = Vector3(0, 0, 0),
-                 life_time: float = 1,
+                 p_life_time: float = 1,
+                 life_time: float | None = None,
+                 life_end_action: str = LIFE_END_STOP,
                  emit_per_sec: float = 10,
                  speed=1,
                  color: str = color.WHITE,
@@ -90,13 +95,16 @@ class ParticleSystem(SceneObject):
 
         self.ch = ch
         self.emit_zone = emit_zone
-        self.life_time = life_time
+        self.life_time = p_life_time
         self.emit_per_sec = emit_per_sec
         self.speed = speed
         self.color = color
         self.gravity = gravity
         self.emit_actions = emit_actions
         self.circle_length = circle_length
+        self.life_time = life_time
+        self.life_end_action = life_end_action
+        self.remain = 0
 
         self.__time = 0
         self.__time_consume = 0
@@ -104,6 +112,9 @@ class ParticleSystem(SceneObject):
         # self.__emit_delta = 1 / self.emit_per_sec
         default_size = self.emit_per_sec * self.life_time
         self.__particles = [Particle() for _ in range(default_size)]
+
+        if self.life_time is not None:
+            self.remain = self.life_time
 
     def tick(self, delta: float) -> None:
         self.__time += delta
@@ -114,6 +125,10 @@ class ParticleSystem(SceneObject):
         self.__emit(delta)
         if self.__circle_time > self.circle_length:
             self.__circle_time = 0
+        if self.life_time is not None:
+            self.remain -= delta
+            if self.life_end_action == LIFE_END_DESTROY and self.remain <= 0:
+                self.context.destroy(self)
 
     def __destroy_old(self):
         for p in self.__particles:
@@ -159,6 +174,8 @@ class ParticleSystem(SceneObject):
                 fnd.death_time = self.__time + self.life_time
 
     def draw(self, draw_callback) -> None:
+        if self.life_time is not None and self.remain <= 0:
+            return
         for p in self.__particles:
             if p.active:
                 smb = SymbolInfo(symbol="*", color=self.color)

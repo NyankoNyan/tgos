@@ -14,13 +14,28 @@ class AppContext:
         self.symbol_buffer = []
         self.scene_objects = set()
         self.tickable_objects = set()
+        self.remove_queue = set()
         self._custom_init()
 
     def instaniate(self, scene_obj: SceneObject = SceneObject()) -> SceneObject:
         self.scene_objects.add(scene_obj)
-        if getattr(scene_obj, "tick"):
+        scene_obj.context = self
+        if self.__is_tickable(scene_obj):
             self.tickable_objects.add(scene_obj)
         return scene_obj
 
+    def destroy(self, scene_obj: SceneObject) -> None:
+        self.remove_queue.add(scene_obj)
+
+    def flush_remove(self):
+        for o in self.remove_queue:
+            self.scene_objects.remove(o)
+            if self.__is_tickable(o):
+                self.tickable_objects.remove(o)
+        self.remove_queue.clear()
+
     def _custom_init(self):
         pass
+
+    def __is_tickable(self, obj):
+        return getattr(obj, "tick")

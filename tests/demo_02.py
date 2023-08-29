@@ -11,7 +11,7 @@ class DemoContext(AppContext):
                                Vector2(0, -1)),
                            speed=5,
                            emit_per_sec=10,
-                           life_time=10,
+                           p_life_time=10,
                            color=WHITE))
         self.snow2 = self.instaniate(
             ParticleSystem(ch="*",
@@ -21,7 +21,7 @@ class DemoContext(AppContext):
                                Vector2(4, -6)),
                            speed=8,
                            emit_per_sec=3,
-                           life_time=10,
+                           p_life_time=10,
                            color=RED))
 
 

@@ -16,7 +16,8 @@ curses_color_map = {
     color.YELLOW: 227,
     color.MAGENTA: 165,
     color.CYAN: 123,
-    color.PINK: 207
+    color.PINK: 207,
+    color.BLUE: 27
 }
 
 
@@ -78,8 +79,9 @@ class App(object):
         delta = curr_timer - self.last_timer
         if delta > 0:
             self.last_timer = curr_timer
-            for o in self.context.tickable_objects:
+            for o in list(self.context.tickable_objects):
                 o.tick(delta)
+        self.context.flush_remove()
 
     def _user_update(self):
         pass

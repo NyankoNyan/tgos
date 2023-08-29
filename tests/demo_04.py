@@ -25,7 +25,7 @@ class DemoContext(AppContext):
             speed=Vector2(15, 30),
             gravity=Vector2(0, -8),
             emit_per_sec=0,
-            life_time=5,
+            p_life_time=5,
             emit_actions=[
                 EmitAction(.1, 20)
             ],
