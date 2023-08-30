@@ -33,11 +33,11 @@ class Hero(SceneObject):
         if not self.atack_sequence:
             if self.context.key == curses.KEY_LEFT:
                 self.side = self.LEFT
-                self.glpos.x -= self.STEP_LENGTH
+                self.coord.x -= self.STEP_LENGTH
                 self.__set_sprite()
             elif self.context.key == curses.KEY_RIGHT:
                 self.side = self.RIGHT
-                self.glpos.x += self.STEP_LENGTH
+                self.coord.x += self.STEP_LENGTH
                 self.__set_sprite()
             elif self.context.key == ord(' '):
                 if not self.atack_sequence:

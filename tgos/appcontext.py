@@ -1,4 +1,6 @@
 import curses
+
+from .camera import Camera
 from .sceneobject import SceneObject
 
 
@@ -15,6 +17,7 @@ class AppContext:
         self.scene_objects = set()
         self.tickable_objects = set()
         self.remove_queue = set()
+        self.main_camera: Camera = None
         self._custom_init()
 
     def instaniate(self, scene_obj: SceneObject = SceneObject()) -> SceneObject:

@@ -1,7 +1,6 @@
 from __future__ import annotations
 from functools import reduce
 from itertools import zip_longest
-from typing import overload
 import math
 
 
@@ -98,6 +97,10 @@ class V(object):
         """
         mag = self.magnitude
         return (self / mag, mag)
+
+    @property
+    def round(self):
+        return self.c([round(e) for e in self.m])
 
 
 class V2(V):

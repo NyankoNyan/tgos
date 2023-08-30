@@ -93,9 +93,15 @@ class App(object):
         self.__clear_screen_buffers()
         context.stdscr.clear()
 
+        if context.main_camera is None:
+            self.__camera_offset = Vector2()
+        else:
+            self.__camera_offset = context.main_camera.offset
+
         def draw_callback(coord: Vector2, symb_info: SymbolInfo):
+            scr_coord = self.__camera_offset + coord
             self.__draw_symbol(
-                (math.floor(coord.x), math.floor(context.scr_size[1] - coord.y)), symb_info)
+                (math.floor(scr_coord.x), math.floor(context.scr_size[1] - scr_coord.y)), symb_info)
 
         self.__draw_game_objects(draw_callback)
         self._user_draw(draw_callback)
