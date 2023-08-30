@@ -116,33 +116,11 @@ class Bullet(SceneObject):
 class DemoContext(AppContext):
     def _custom_init(self):
         self.hero = self.instaniate(Hero(coord=Vector3(20, 12, 1)))
-        # platforms = Sprite.sprityfy(side_tiles.platforms, Vector2(.5, 0))
-        # n = 8
-        # for i in range(n):
-        #     coord = Vector3(5+i*5, 1, 0)
-        #     if i == 0:
-        #         sprite = platforms["left"]
-        #     elif i == n-1:
-        #         sprite = platforms["right"]
-        #     else:
-        #         sprite = platforms["center"]
-        #     self.instaniate(SceneObject(sprite=sprite, coord=coord))
         test_tiles.coord = Vector3(5, 1, 0)
         self.instaniate(
             test_tiles
         )
 
 
-class DemoApp(App):
-    def _user_update(self):
-        pass
-
-    # def _user_draw(self, draw_callback):
-    #     draw_callback(
-    #         self.context.hero.coord,
-    #         SymbolInfo(symbol="H")
-    #     )
-
-
 if __name__ == "__main__":
-    DemoApp(DemoContext).start()
+    App(DemoContext).start()
