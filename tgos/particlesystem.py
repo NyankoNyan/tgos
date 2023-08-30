@@ -95,7 +95,7 @@ class ParticleSystem(SceneObject):
 
         self.ch = ch
         self.emit_zone = emit_zone
-        self.life_time = p_life_time
+        self.p_life_time = p_life_time
         self.emit_per_sec = emit_per_sec
         self.speed = speed
         self.color = color
@@ -110,7 +110,7 @@ class ParticleSystem(SceneObject):
         self.__time_consume = 0
         self.__circle_time = 0
         # self.__emit_delta = 1 / self.emit_per_sec
-        default_size = self.emit_per_sec * self.life_time
+        default_size = self.emit_per_sec * self.p_life_time
         self.__particles = [Particle() for _ in range(default_size)]
 
         if self.life_time is not None:
@@ -171,7 +171,7 @@ class ParticleSystem(SceneObject):
                 fnd.active = True
                 fnd.coord, dir = self.emit_zone.get_emit()
                 fnd.speed = dir * support.evaluate(self.speed)
-                fnd.death_time = self.__time + self.life_time
+                fnd.death_time = self.__time + self.p_life_time
 
     def draw(self, draw_callback) -> None:
         if self.life_time is not None and self.remain <= 0:
