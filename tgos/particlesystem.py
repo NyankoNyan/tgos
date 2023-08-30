@@ -179,6 +179,6 @@ class ParticleSystem(SceneObject):
         for p in self.__particles:
             if p.active:
                 smb = SymbolInfo(symbol="*", color=self.color)
-                pos = Vector2(p.coord.x + self.coord.x,
-                              p.coord.y + self.coord.y)
+                pos = Vector2(p.coord.x + self.glpos.x,
+                              p.coord.y + self.glpos.y)
                 draw_callback(pos, smb)

@@ -33,11 +33,11 @@ class Hero(SceneObject):
         if not self.atack_sequence:
             if self.context.key == curses.KEY_LEFT:
                 self.side = self.LEFT
-                self.coord.x -= self.STEP_LENGTH
+                self.glpos.x -= self.STEP_LENGTH
                 self.__set_sprite()
             elif self.context.key == curses.KEY_RIGHT:
                 self.side = self.RIGHT
-                self.coord.x += self.STEP_LENGTH
+                self.glpos.x += self.STEP_LENGTH
                 self.__set_sprite()
             elif self.context.key == ord(' '):
                 if not self.atack_sequence:
@@ -52,10 +52,10 @@ class Hero(SceneObject):
             self.__set_sprite()
 
             if self.side == self.RIGHT:
-                missile_coord = self.coord + self.MISSILE_R_OFFSET
+                missile_coord = self.glpos + self.MISSILE_R_OFFSET
                 dir = Vector3(1, 0, 0)
             else:
-                missile_coord = self.coord + self.MISSILE_L_OFFSET
+                missile_coord = self.glpos + self.MISSILE_L_OFFSET
                 dir = Vector3(-1, 0, 0)
             self.context.instaniate(Bullet(missile_coord, dir))
 
@@ -102,7 +102,7 @@ class Bullet(SceneObject):
         self.context.instaniate(ParticleSystem(
             ch="*",
             emit_zone=RoundEmitZone(),
-            coord=self.coord,
+            coord=self.glpos,
             color=color.YELLOW,
             p_life_time=1,
             emit_per_sec=0,

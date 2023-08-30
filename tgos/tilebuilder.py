@@ -33,7 +33,8 @@ class TileBuilder(SceneObject):
                     self.context.instaniate(
                         SceneObject(
                             sprite=self.tiles[symb],
-                            coord=self.coord + offset
+                            coord=offset,
+                            parent=self
                         )
                     )
 

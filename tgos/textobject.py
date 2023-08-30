@@ -55,6 +55,7 @@ class TextObject(SceneObject):
             curr_offset.x += image.size_x + self.font.offset.x
 
     def _draw_letter(self, image: Image, offset: Vector2, draw_callback):
+        pos = self.glpos
         for ix in range(image.size_x):
             for iy in range(image.size_y):
                 symb_info = image.get_char(ix, iy)
@@ -63,4 +64,4 @@ class TextObject(SceneObject):
                     symb_info.bg_alpha = False
                     symb_info.bg_color = symb_info.color
                 draw_callback(
-                    self.coord + (offset.x+ix, offset.y-iy, 0), symb_info)
+                    pos + (offset.x+ix, offset.y-iy, 0), symb_info)
