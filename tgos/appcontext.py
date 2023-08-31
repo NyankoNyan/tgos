@@ -14,7 +14,7 @@ class AppContext:
         self.bg_color_buffer = []
         self.color_buffer = []
         self.symbol_buffer = []
-        self.scene_objects = set()
+        self.scene_objects: set[SceneObject] = set()
         self.tickable_objects = set()
         self.remove_queue = set()
         self.main_camera: Camera = None

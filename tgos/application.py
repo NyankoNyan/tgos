@@ -41,12 +41,14 @@ class App(object):
         curses.update_lines_cols()
         stdscr.clear()
         curses.noecho()
+        stdscr.nodelay(True)
         curses.cbreak()
         curses.curs_set(False)
         curses.start_color()
         curses.use_default_colors()
-        # curses.init_pair(1, 1, -1)
         stdscr.keypad(True)
+        curses.mousemask(curses.ALL_MOUSE_EVENTS)
+        # print('\033[?1003h') # enable mouse tracking with the XTERM API
         stdscr.timeout(1000//15)
 
         self.__main_loop()
@@ -98,8 +100,13 @@ class App(object):
         else:
             self.__camera_offset = context.main_camera.offset
 
-        def draw_callback(coord: Vector2, symb_info: SymbolInfo):
-            scr_coord = self.__camera_offset + coord
+        def draw_callback(coord: Vector2, 
+                          symb_info: SymbolInfo,
+                          screen_space:bool = False):
+            if screen_space:
+                scr_coord = coord
+            else:
+                scr_coord = self.__camera_offset + coord
             self.__draw_symbol(
                 (math.floor(scr_coord.x), math.floor(context.scr_size[1] - scr_coord.y)), symb_info)
 
@@ -158,7 +165,8 @@ class App(object):
         gos = list(self.context.scene_objects)
         gos.sort(key=lambda x: x.coord.z)
         for go in gos:
-            go.draw(draw_callback)
+            if go.active:
+                go.draw(draw_callback)
 
     def __draw_symbol(self, coord: list, symb_info: SymbolInfo) -> None:
         context = self.context
