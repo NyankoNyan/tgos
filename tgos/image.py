@@ -9,6 +9,7 @@ default_color_map = {
 
 
 class SymbolInfo(object):
+    "Полное описание графического символа для вывода в терминал"
     __slots__ = [
         "alpha",
         "bg_alpha",
@@ -31,6 +32,17 @@ class SymbolInfo(object):
 
 
 class Image(object):
+    """ASCII картинка.
+
+    Разбита на несколько слоёв: символы, цвета символов, цвета фона. 
+    Первая и последная строка каждого слоя не используется.
+    Можете вставить в них комментарии, что угодно.
+    Количество строк в слоях должно быть одинаковым.
+
+    Цветовые слои используют символы цветов. 
+    Мэппинг символов на цвета движка осуществляется через словарь color_map.
+    color_map можно менять в рантайме, чтобы сменить цветовую палитру.
+    """
     __slots__ = [
         "main_layer",
         "color_layer",
@@ -81,11 +93,13 @@ class Image(object):
         assert (self.size_y > 0)
 
     def _calc_x_size(self) -> int:
+        "Вычисляет макимальную ширину среди всех слоёв"
         return max(symbmap.calc_layer_x_size(self.main_layer),
                    symbmap.calc_layer_x_size(self.bg_layer),
                    symbmap.calc_layer_x_size(self.color_layer))
 
     def _calc_y_size(self) -> int:
+        "Вычисляет высоту слоёв. Заодно проверяет, что высота у всех слоёв одинаковая."
         lens = []
         lens.append(symbmap.calc_layer_y_size(self.main_layer))
         if self.bg_layer != None:
@@ -100,7 +114,7 @@ class Image(object):
 
     def get_char(self, x: int, y: int) -> SymbolInfo:
         """
-        Returns (alpha, symbol, color, bgalpha, bgcolor)
+        Возвращает информацию о графическом символе картинки по координате
         """
         alpha = True
         color = self.default_color
@@ -126,6 +140,7 @@ class Image(object):
         return SymbolInfo(alpha, symbol, color, bgalpha, bgcolor)
 
     def _map_color(self, color: str) -> str:
+        "Возвращает цвет движка по его символу. Если символ не известен, вернёт цвет по-умолчанию."
         try:
             return self.color_map[color]
         except:
@@ -133,6 +148,7 @@ class Image(object):
 
     @staticmethod
     def apply(imgs: [str, 'Image'], color_map: [str, str] = None) -> [str, 'Image']:
+        "Применяет модификаторы к словарю из изображений. Для массового изменения."
         for _, img in imgs.items():
             if color_map is not None:
                 img.color_map = color_map

@@ -7,6 +7,7 @@ from .appcontext import AppContext
 from .common_types import Vector2
 from .image import Image, SymbolInfo
 
+
 curses_color_map = {
     color.WHITE: curses.COLOR_WHITE,
     color.BLACK: curses.COLOR_BLACK,
@@ -21,9 +22,16 @@ curses_color_map = {
     color.GRAY: 245,
     color.DARK_GRAY: 233
 }
+"""
+Это карта цветов. Подходит для xterm256, а у нас местами xterm8, 
+а потому нужно сделать несколько таких карт и выставлять подходящую.
+"""
 
 
 class App(object):
+    """
+    Это наш основной класс приложения. Он умеет всё рисовать. Из-за этого он сложный и жирный.
+    """
     color_pairs = {}
     color_pairs_counter = 0
 
@@ -31,12 +39,14 @@ class App(object):
         self.contextClass = contextClass
         self.context = contextClass
         self.last_timer = time.time()
+        self.framerate = 15
 
     def start(self):
         os.environ.setdefault("ESCDELAY", "25")
         curses.wrapper(self.__main)
 
     def __main(self, stdscr: curses.window):
+        "Здесь происходит инициализация и деинициализация curses, а также запуск основного обработчика."
         self.context = self.contextClass(stdscr)
         curses.update_lines_cols()
         stdscr.clear()
@@ -49,16 +59,21 @@ class App(object):
         stdscr.keypad(True)
         curses.mousemask(curses.ALL_MOUSE_EVENTS)
         # print('\033[?1003h') # enable mouse tracking with the XTERM API
-        stdscr.timeout(1000//15)
+        stdscr.timeout(1000//self.framerate)
 
         self.__main_loop()
 
         curses.endwin()
 
     def __main_loop(self):
+        skip_first = True
+
         while (True):
             context = self.context
-            context.key = context.stdscr.getch()
+            if skip_first:
+                skip_first = False
+            else:
+                context.key = context.stdscr.getch()
             rows, cols = context.stdscr.getmaxyx()
             context.scr_resize = (
                 context.scr_size[0] != cols or context.scr_size[1] != rows)
@@ -91,6 +106,7 @@ class App(object):
         pass
 
     def __draw_all(self):
+        "Рисует сцену"
         context = self.context
         self.__clear_screen_buffers()
         context.stdscr.clear()
@@ -103,6 +119,7 @@ class App(object):
         def draw_callback(coord: Vector2,
                           symb_info: SymbolInfo,
                           screen_space: bool = False):
+            "Через вызов этой функции будет происходить отрисовка во всех объектах сцены"
             if screen_space:
                 scr_coord = coord
             else:
@@ -128,6 +145,9 @@ class App(object):
         context.bg_color_buffer = [color.BLACK] * buff_len
 
     def __draw_screen_buffers(self):
+        """
+        Пересылает изображение из буферов в рисовалку curses. 
+        """
         context = self.context
         for ix in range(context.scr_size[0]):
             for iy in range(context.scr_size[1]):
@@ -135,12 +155,23 @@ class App(object):
                 color_pair = self.__get_color_pair(
                     context.color_buffer[flat_coord], context.bg_color_buffer[flat_coord])
                 try:
-                    context.stdscr.addstr(
+                    context.stdscr.addch(
                         iy, ix, context.symbol_buffer[flat_coord], curses.color_pair(color_pair))
                 except:
                     pass
 
     def __get_color_pair(self, text_color: str, bg_color: str) -> int:
+        """
+        Возвращает уникальный идентификатор для цветовой пары. 
+        Если цветовая пара используется впервые, создаст новый идентификатор.
+
+        Этот идентификатор использует ncurses для понимания, какой цвет символа и фона надо рисовать.
+        Число цветовых пар не может быть больше 256, при это цветовая пара с индексом 0 изначально задана.
+        Это ограничение на уровне C-кода ncurses, поэтому не может быть изменено.
+
+        В теории можно инвертировать цветовую пару, что даст дополнительно ёщё 256 цветовых пар.
+        Можно использовать интенсивность окраски, что увеличит число цветовых пар ещё втрое.
+        """
         cur_text_color = self.__get_curses_color(text_color)
         cur_bg_color = self.__get_curses_color(bg_color)
 
@@ -156,12 +187,17 @@ class App(object):
             return App.color_pairs_counter
 
     def __get_curses_color(self, color: str) -> str:
+        "Переводит цвет из имени в движке (white, black, ...) в индексы curses (0, 1, ...)"
         try:
             return curses_color_map[color]
         except:
             return curses.COLOR_BLACK
 
     def __draw_game_objects(self, draw_callback):
+        """
+        Отрисовывает все доступные для рисования объекты сцены, предварительно сортируя их по глубине.
+        Объекты, рисуемые иерархически, используют сортировку родительского объекта и рисуются поверх него.
+        """
         gos = list(self.context.scene_objects)
         gos.sort(key=lambda x: x.coord.z)
         for go in gos:
@@ -169,6 +205,12 @@ class App(object):
                 go.draw(draw_callback)
 
     def __draw_symbol(self, coord: list, symb_info: SymbolInfo) -> None:
+        """
+        Распихивает графический символ по буферам. 
+        Если для символа установлен прозрачный фон, будет использован фон с текущей позиции вывода.
+
+        Сивол не попадающий в границы экрана будет проигнорирован.
+        """
         context = self.context
 
         if symb_info.bg_alpha and (symb_info.alpha or symb_info.symbol == ' '):
@@ -193,7 +235,7 @@ class App(object):
 
         context.symbol_buffer[flat_coord] = symb_info.symbol
 
-    def __draw_sprite(self, sprite: Image, coord: list):
+    def __draw_image(self, sprite: Image, coord: list):
         for ix in range(sprite.size_x):
             for iy in range(sprite.size_y):
                 symb_info = sprite.get_char(ix, iy)

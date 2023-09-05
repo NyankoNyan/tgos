@@ -22,7 +22,7 @@ class SceneObject(object):
         self.active = True
         self.draw_in_hier = draw_in_hier
 
-    def draw(self, draw_callback):
+    def draw(self, draw_callback) -> None:
         if self.sprite is not None:
             self.sprite.draw(self.glpos.v2, draw_callback)
         for ch in self.__children:

@@ -5,6 +5,13 @@ from .sceneobject import SceneObject
 
 
 class AppContext:
+    """
+    Класс контекста. 
+
+    Хранит в себе все используемые данные. Рекомендую добавлять пользовательские 
+    данные сюда же. Что, мы зря на питоне что ли пишем. 
+    А чтобы не было конфликта имён, рекомендуется называть все пользовательские атрибуты с z*
+    """
     def __init__(self, stdscr: curses.window) -> None:
         self.stdscr = stdscr
         self.exit = False
@@ -14,6 +21,7 @@ class AppContext:
         self.bg_color_buffer = []
         self.color_buffer = []
         self.symbol_buffer = []
+        self.flag_buffer = []
         self.scene_objects: set[SceneObject] = set()
         self.tickable_objects = set()
         self.remove_queue = set()
@@ -21,6 +29,7 @@ class AppContext:
         self._custom_init()
 
     def instaniate(self, scene_obj: SceneObject = SceneObject()) -> SceneObject:
+        "Помещает объект на сцену. Возвращает этот же объект."
         self.scene_objects.add(scene_obj)
         scene_obj.context = self
         if self.__is_tickable(scene_obj):
@@ -30,9 +39,13 @@ class AppContext:
         return scene_obj
 
     def destroy(self, scene_obj: SceneObject) -> None:
+        "Помечает объект для удаления со сцены в конце кадра."
         self.remove_queue.add(scene_obj)
 
     def flush_remove(self):
+        """(Не для использования)
+        Вызывает удаление помещенных объектов.
+        """
         for o in self.remove_queue:
             self.scene_objects.remove(o)
             if self.__is_tickable(o):
@@ -40,6 +53,7 @@ class AppContext:
         self.remove_queue.clear()
 
     def _custom_init(self):
+        "Переопределите этот метод, чтобы инициализировать свои объекты на сцене."
         pass
 
     def __is_tickable(self, obj):

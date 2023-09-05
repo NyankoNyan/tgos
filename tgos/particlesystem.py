@@ -14,6 +14,7 @@ LIFE_END_DESTROY = "destroy"
 
 
 class Particle(object):
+    """Одна частица со всеми её параметрами."""
     __slots__ = ["coord", "death_time", "active", "speed"]
 
     def __init__(self,
@@ -28,6 +29,7 @@ class Particle(object):
 
 
 class EmitAction(object):
+    """Опысывает мгновенное испускание множества частиц."""
     __slots__ = ["time", "count"]
 
     def __init__(self, time: float, count: int) -> None:
@@ -36,11 +38,16 @@ class EmitAction(object):
 
 
 class EmitZone(object):
+    """Базовый объект для зон испускания частиц."""
     def get_emit(self) -> (Vector2, Vector2):
         raise Exception()
 
 
 class RectEmitZone(EmitZone):
+    """Прямоугольная зона испускания частиц.
+    
+    Все частицы будут лететь параллельно в заданном направлении.
+    """
     def __init__(self, rect: Rect, dir: Vector2) -> None:
         self.rect = rect
         self.dir = dir.normalized
@@ -54,6 +61,15 @@ class RectEmitZone(EmitZone):
 
 
 class RoundEmitZone(EmitZone):
+    """Круговая зона испускания частиц.
+    
+    Можно указать радиус зоны испускания. Частицы распределяются неравномерно. 
+    Ближе к центру они будут распределены плотнее.
+
+    Можно указать углы испускания, чтобы ограничить зону конусом.
+
+    Можно изменить скорость вылета частиц по разным осям с помощью параметра ellipse_mod.
+    """
     def __init__(self,
                  center: Vector2 = Vector2(0, 0),
                  radius: float = 0,
@@ -78,8 +94,30 @@ class RoundEmitZone(EmitZone):
 
 
 class ParticleSystem(SceneObject):
+    """Система частиц.
+
+    На текущий момент может выдать из себя только одинаковые частицы.
+
+    emit_zone - объект зоны испускания частиц.
+
+    p_life_time - время жизни одной частицы
+
+    life_time - время жизни все системы частиц. Если передано None система будет жить бесконечно.
+
+    life_end_ation - что происходит с системой частиц после окончания действия (прекращение испускания или самоудаление).
+
+    emit_per_second - количество новых частиц в секунду
+
+    speed - скорость вылета частиц. Можно задать дипазон с помощью Vector2 или кортежа.
+
+    gravity - вектор изменения скорости в секунду
+
+    circle_length - время одного цикла испускания частиц. По оконочанию цикла происходит сброс всех циклических параметров.
+
+    emit_actions - список порционных испусканий частиц. Время испускания привязано в времени цикла
+    """
     def __init__(self,
-                 ch: str,
+                 ch: str, 
                  emit_zone: EmitZone,
                  coord: Vector3 = Vector3(0, 0, 0),
                  p_life_time: float = 1,
