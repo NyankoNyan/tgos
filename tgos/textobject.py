@@ -19,7 +19,7 @@ class Font(object):
 
 class TextObject(SceneObject):
 
-    __slots__ = ["font", "value"]
+    __slots__ = ["font", "value", "anchor"]
 
     def __init__(self,
                  font: Font,

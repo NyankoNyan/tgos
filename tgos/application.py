@@ -100,9 +100,9 @@ class App(object):
         else:
             self.__camera_offset = context.main_camera.offset
 
-        def draw_callback(coord: Vector2, 
+        def draw_callback(coord: Vector2,
                           symb_info: SymbolInfo,
-                          screen_space:bool = False):
+                          screen_space: bool = False):
             if screen_space:
                 scr_coord = coord
             else:
@@ -165,7 +165,7 @@ class App(object):
         gos = list(self.context.scene_objects)
         gos.sort(key=lambda x: x.coord.z)
         for go in gos:
-            if go.active:
+            if go.active and (go.parent is None or not go.draw_in_hier):
                 go.draw(draw_callback)
 
     def __draw_symbol(self, coord: list, symb_info: SymbolInfo) -> None:

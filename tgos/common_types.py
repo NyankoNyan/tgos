@@ -5,6 +5,7 @@ from . import vectors
 Vector2 = vectors.V2
 Vector3 = vectors.V3
 
+
 class Rect(object):
     __slots__ = ["x", "y", "width", "height"]
 
@@ -21,3 +22,14 @@ class Rect(object):
     @property
     def size(self):
         return Vector2(self.width, self.height)
+
+
+class Borders(object):
+    __slots__ = ["l", "r", "t", "b"]
+
+    def __init__(self, l: int = 0, r: int = 0, t: int = 0, b: int = 0) -> None:
+        assert l >= 0 and r >= 0 and t >= 0 and b >= 0
+        self.l = l
+        self.r = r
+        self.t = t
+        self.b = b

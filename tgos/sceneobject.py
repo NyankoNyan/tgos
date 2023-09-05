@@ -5,12 +5,14 @@ import tgos.appcontext
 
 
 class SceneObject(object):
-    __slots__ = ["sprite", "coord", "context", "__parent", "__children", "active"]
+    __slots__ = ["sprite", "coord", "context",
+                 "__parent", "__children", "active", "draw_in_hier"]
 
     def __init__(self,
                  sprite: Sprite = None,
                  coord: Vector3 = Vector3(0, 0, 0),
-                 parent: SceneObject = None) -> None:
+                 parent: SceneObject = None,
+                 draw_in_hier: bool = False) -> None:
         self.sprite = sprite
         self.coord = coord
         self.context: tgos.appcontext.AppContext = None
@@ -18,10 +20,14 @@ class SceneObject(object):
         self.__children: list[SceneObject] = []
         self.parent = parent
         self.active = True
+        self.draw_in_hier = draw_in_hier
 
     def draw(self, draw_callback):
         if self.sprite is not None:
             self.sprite.draw(self.glpos.v2, draw_callback)
+        for ch in self.__children:
+            if ch.draw_in_hier:
+                ch.draw(draw_callback)
 
     @property
     def glpos(self):
