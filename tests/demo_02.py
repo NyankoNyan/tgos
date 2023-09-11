@@ -27,10 +27,11 @@ class DemoContext(AppContext):
 
 class DemoApp(App):
     def _user_update(self):
+        scr_size = self.context.scr.scr_size
         self.context.snow.emit_zone.rect = Rect(
-            0, self.context.scr_size[1] - 1, self.context.scr_size[0], 1)
+            0, scr_size.y - 1, scr_size.x, 1)
         self.context.snow2.emit_zone.rect = Rect(
-            0, self.context.scr_size[1] - 1, self.context.scr_size[0], 1)
+            0, scr_size.y - 1, scr_size.x, 1)
 
 
 if __name__ == "__main__":

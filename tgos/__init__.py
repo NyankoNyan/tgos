@@ -18,4 +18,5 @@ from .particlesystem import *
 from .tilebuilder import TileBuilder
 from .camera import Camera
 from .ui import *
-from . import support
+from .screen import Screen
+from . import support, mouse

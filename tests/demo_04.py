@@ -34,8 +34,7 @@ class DemoContext(AppContext):
 
 class DemoApp(App):
     def _user_update(self):
-        pos = Vector2(self.context.scr_size[0]/2,
-                      self.context.scr_size[1]/2)
+        pos = self.context.scr.scr_size / 2
         self.context.salute.emit_zone.center = pos - Vector2(20, 0)
         self.context.salute2.emit_zone.center = pos + Vector2(20, 0)
 

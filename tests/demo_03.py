@@ -30,8 +30,8 @@ class DemoContext(AppContext):
 
 class DemoApp(App):
     def _user_update(self):
-        pos = Vector2(random.random()*self.context.scr_size[0],
-                      random.random()*self.context.scr_size[1])
+        pos = Vector2(random.random()*self.context.scr.scr_size.x,
+                      random.random()*self.context.scr.scr_size.y)
         self.context.salute.emit_zone.center = pos
         self.context.salute2.emit_zone.center = pos
         self.context.salute3.emit_zone.center = pos

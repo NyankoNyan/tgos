@@ -14,4 +14,4 @@ class Camera(SceneObject):
 
     @property
     def offset(self) -> Vector2:
-        return self.pivot * self.context.scr_size - self.glpos
+        return self.pivot * self.context.scr.scr_size - self.glpos

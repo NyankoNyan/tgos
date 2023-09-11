@@ -61,3 +61,7 @@ class SceneObject(object):
         assert so is not None
         self.__children.remove(so)
         so.__parent = None
+
+    @property
+    def children(self):
+        return self.__children

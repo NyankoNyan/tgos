@@ -1,6 +1,7 @@
 from __future__ import annotations
 from . import color
 from . import symbmap
+from .common_types import Vector2
 
 default_color_map = {
     "0": color.BLACK,
@@ -153,3 +154,7 @@ class Image(object):
             if color_map is not None:
                 img.color_map = color_map
         return imgs
+
+    @property
+    def size(self):
+        return Vector2(self.size_x, self.size_y)

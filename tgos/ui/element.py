@@ -1,5 +1,7 @@
+from __future__ import annotations
 from ..sceneobject import SceneObject
 from ..common_types import Rect, Vector2, Vector3
+
 
 class Element(SceneObject):
     __slots__ = ["rect", "rc_target"]
@@ -17,8 +19,8 @@ class Element(SceneObject):
     def on_click(self):
         pass
 
-    def search_elem(self, pos: Vector2):
-        for ch in self.__children:
+    def search_raycast(self, pos: Vector2) -> Element:
+        for ch in self.children:
             if ch.active and issubclass(ch, Element):
                 elem = ch.search_elem(pos)
                 if elem is not None:

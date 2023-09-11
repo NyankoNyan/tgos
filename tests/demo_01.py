@@ -23,17 +23,13 @@ class DemoApp(App):
         context = self.context
         context.frame_counter += 1
         stage_val = context.frame_counter * math.pi / 18
-        # stage = math.sin(context.frame_counter * math.pi / 18)
-        center = (context.scr_size[0] // 2, context.scr_size[1] // 2)
+        center = (context.scr.scr_size.x // 2, context.scr.scr_size.y // 2)
         grass_count = len(context.grass_gos)
 
-        # context.tree_go.coord = Vector3(center[0] + int(stage * 6), 3, -2)
         context.tree_go.coord = Vector3(center[0], 10, -2)
 
         for i in range(grass_count):
             angle = stage_val + i * math.pi * 2 / grass_count
-            # context.grass_gos[i].coord = Vector3(
-            #     center[0] + (i-1) * 10 + stage * 12, 2, -1)
             go = context.grass_gos[i]
 
             offset = Vector3(math.sin(angle) * 10, math.cos(angle) * 1.1, 0)
