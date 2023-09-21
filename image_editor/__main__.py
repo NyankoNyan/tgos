@@ -5,6 +5,9 @@ from ascii_sprites import borders
 from tgos.appcontext import AppContext
 from tgos.common_types import Rect
 from ascii_sprites.actors import images as hero_img
+from tgos.sceneobject import SceneObject
+from tgos.sprite import Sprite
+import itertools
 
 
 class ClickState(object):
@@ -15,8 +18,8 @@ class ClickState(object):
 
 
 class ImageWindow(Panel):
-    def __init__(self, rect: Rect) -> None:
-        super().__init__(rect, rc_target=True, border_sprite=borders.thick)
+    def __init__(self) -> None:
+        super().__init__(rect=Rect(0, 0, 10, 10), rc_target=True, border_sprite=borders.thick)
         self.__image: Image = None
         self.__sprite: Sprite = None
         self.__click_state: ClickState = None
@@ -49,14 +52,12 @@ class ImageWindow(Panel):
     def __get_image_rect(self) -> Rect:
         inner_rect = self.inside
         img_size = self.__sprite.image.size
-        return Rect(inner_rect.x, inner_rect.height - img_size.y + 1, img_size.x, img_size.y)
+        return Rect(inner_rect.x, inner_rect.height - img_size.y + 2, img_size.x, img_size.y)
 
     def start(self):
         pass
 
     def tick(self, delta):
-        self.context.imgwnd.rect.width = self.context.scr.scr_size.x
-        self.context.imgwnd.rect.height = self.context.scr.scr_size.y
         if self.__click_state is not None:
             sel = self.__click_state.coord
             img_rect = self.__get_image_rect()
@@ -83,11 +84,60 @@ class ImageWindow(Panel):
             context.mouse_btn, context.mouse_event, context.mouse_coord - self.glpos.v2)
 
 
+class ToolsWindow(Panel):
+    def __init__(self) -> None:
+        super().__init__(rect=Rect(0, 0, 10, 10), rc_target=True, border_sprite=borders.thick)
+
+
+class TextCommandWindow(Panel):
+    SYMB = range(0x20, 0x7f)
+
+    def __init__(self) -> None:
+        super().__init__(rect=Rect(0, 0, 10, 10), rc_target=True, border_sprite=borders.thick)
+        self.__focused = False
+        self.__text_line: Label = None
+        self.__text = ""
+
+    def start(self) -> None:
+        self.__text_line = self.context.instaniate(
+            Label(pos=Vector2(1, 1), parent=self))
+
+    def on_click(self) -> None:
+        self.context.set_focus(self)
+
+    def on_loose_focus(self) -> None:
+        self.__focused = False
+
+    def on_gain_focus(self) -> None:
+        self.__focused = True
+
+    def tick(self, delta: float) -> None:
+        if self.__focused:
+            if self.context.key in self.SYMB:
+                self.__text = self.__text.join(self.context.key)
+            elif self.context.key == curses.KEY_BACKSPACE:
+                if len(self.__text) > 0:
+                    self.__text = self.__text[:-2]
+            elif self.context.key == curses.KEY_EXIT:
+                self.__text = ""
+            self.__text_line.text = self.__text
+
+
 class ImageEditorContext(AppContext):
     def _custom_init(self):
         self.mel = self.instaniate(MouseEventListener())
-        self.imgwnd = self.instaniate(ImageWindow(Rect(0, 1, 10, 10)))
+        self.imgwnd: ImageWindow = self.instaniate(ImageWindow())
         self.imgwnd.image = hero_img["hero_atack_l"]
+        self.current_focus = None
+        # self.toolwnd: ToolsWindow = self.instaniate(ToolsWindow())
+        # self.cmdwnd: TextCommandWindow = self.instaniate(TextCommandWindow())
+
+    def set_focus(self, panel: Panel):
+        if self.current_focus is not None and hasattr(self.current_focus, "on_loose_focus"):
+            self.current_focus.on_loose_focus()
+        self.current_focus = panel
+        if self.current_focus is not None and hasattr(self.current_focus, "on_gain_focus"):
+            self.current_focus.on_gain_focus()
 
         # self.text_panel = self.instaniate(
         #     Panel(rect=Rect(6, 6, 30, 10),
@@ -104,13 +154,42 @@ class ImageEditorContext(AppContext):
 
 
 class ImageEditorApp(App):
+    CMD_WINDOW_HEIGHT = 4
+    TOOL_WINDOW_WIDTH = 10
+
     def __init__(self, contextClass: AppContext) -> None:
-        super().__init__(contextClass)
+        super().__init__(contextClass, mock_mode=False)
         self.framerate = -1
+        self.context: ImageEditorContext
 
     def _user_update(self):
-        self.context.imgwnd.rect.width = self.context.scr.scr_size.x
-        self.context.imgwnd.rect.height = self.context.scr.scr_size.y
+        self._split_windows()
+
+    def _split_windows(self):
+        self.context.imgwnd.rect = Rect(
+            0,
+            self.CMD_WINDOW_HEIGHT,
+            self.context.scr.scr_size.x - self.TOOL_WINDOW_WIDTH,
+            self.context.scr.scr_size.y - self.CMD_WINDOW_HEIGHT
+        )
+        self.context.imgwnd.rect = Rect(
+            10,
+            0,
+            self.context.scr.scr_size.x-10,
+            self.context.scr.scr_size.y-5
+        )
+        # self.context.toolwnd.rect = Rect(
+        #     self.context.scr.scr_size.x - self.TOOL_WINDOW_WIDTH,
+        #     self.CMD_WINDOW_HEIGHT,
+        #     self.TOOL_WINDOW_WIDTH,
+        #     self.context.scr.scr_size.y - self.CMD_WINDOW_HEIGHT
+        # )
+        # self.context.cmdwnd.rect = Rect(
+        #     0,
+        #     0,
+        #     self.context.scr.scr_size.x,
+        #     self.CMD_WINDOW_HEIGHT
+        # )
 
     def _user_draw(self, draw_callback):
         return

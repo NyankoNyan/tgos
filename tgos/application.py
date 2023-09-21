@@ -1,3 +1,4 @@
+from __future__ import annotations
 import os
 import curses
 from . import color, mouse
@@ -35,19 +36,25 @@ class App(object):
     # color_pairs = {}
     # color_pairs_counter = 0
 
-    def __init__(self, contextClass: AppContext) -> None:
-        self.contextClass = contextClass
-        self.context = contextClass
+    def __init__(self, context_class: AppContext, mock_mode: bool = False, mock_sequence:[int] = None) -> None:
+        self.context_class = context_class
+        self.context: AppContext = None
         self.last_timer = time.time()
         self.framerate = 15
+        self.__mock_mode = mock_mode
+        self.__mock_sequence = mock_sequence
+        self.__mock_counter = 0
 
     def start(self):
         os.environ.setdefault("ESCDELAY", "25")
-        curses.wrapper(self.__main)
+        if (self.__mock_mode):
+            self.__mock_main()
+        else:
+            curses.wrapper(self.__main)
 
     def __main(self, stdscr: curses.window):
         "Здесь происходит инициализация и деинициализация curses, а также запуск основного обработчика."
-        self.context = self.contextClass(stdscr)
+        self.context = self.context_class(stdscr)
         curses.update_lines_cols()
         stdscr.clear()
         curses.noecho()
@@ -65,17 +72,40 @@ class App(object):
 
         curses.endwin()
 
+    def __mock_main(self):
+        self.context = self.context_class(None)
+        self.__main_loop()
+
+    def __next_mock_command(self) -> int:
+        if self.__mock_sequence is None or len(self.__mock_sequence)==0:
+            return 0
+        else:
+            if self.__mock_counter >= len(self.__mock_sequence):
+                self.__mock_counter=0
+            result = self.__mock_sequence[self.__mock_counter]
+            self.__mock_counter += 1
+            return result
+
     def __main_loop(self):
         skip_first = True
 
-        while (True):
+        while True:
             context = self.context
             if skip_first:
                 skip_first = False
             else:
-                context.key = context.stdscr.getch()
+                if self.__mock_mode:
+                    if self.framerate > 0:
+                        time.sleep(1/self.framerate)
+                    context.key = self.__next_mock_command()
+                else:
+                    context.key = context.stdscr.getch()
 
-            rows, cols = context.stdscr.getmaxyx()
+            if self.__mock_mode:
+                rows = 20
+                cols = 80
+            else:
+                rows, cols = context.stdscr.getmaxyx()
             context.scr_resize = (
                 context.scr.scr_size.x != cols or context.scr.scr_size.y != rows)
             if context.scr_resize:
@@ -123,7 +153,6 @@ class App(object):
                 o.before_tick(delta)
         self.context.flush_remove()
 
-
     def _user_update(self):
         pass
 
@@ -131,8 +160,8 @@ class App(object):
         "Рисует сцену"
         context = self.context
         context.scr.clear_buffers()
-        # self.__clear_screen_buffers()
-        context.stdscr.clear()
+        if not self.__mock_mode:
+            context.stdscr.clear()
 
         if context.main_camera is None:
             self.__camera_offset = Vector2()
@@ -153,8 +182,9 @@ class App(object):
         self.__draw_game_objects(draw_callback)
         self._user_draw(draw_callback)
 
-        context.scr.draw_buffers(context.stdscr)
-        context.stdscr.refresh()
+        if not self.__mock_mode:
+            context.scr.draw_buffers(context.stdscr)
+            context.stdscr.refresh()
 
     def _user_draw(self, draw_callback):
         pass

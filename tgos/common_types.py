@@ -19,9 +19,19 @@ class Rect(object):
     def corner(self):
         return Vector2(self.x, self.y)
 
+    @corner.setter
+    def corner(self, value: Vector2):
+        self.x = value.x
+        self.y = value.y
+
     @property
     def size(self):
         return Vector2(self.width, self.height)
+
+    @size.setter
+    def size(self, value: Vector2):
+        self.width = value.x
+        self.height = value.y
 
 
 class Borders(object):

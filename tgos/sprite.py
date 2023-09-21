@@ -47,7 +47,7 @@ class Sprite(object):
                 img_ofs = self.__get_image_offset(ix, iy)
                 symb_info = self.image.get_char(img_ofs.x, img_ofs.y)
                 draw_callback(
-                    coord + (ix, -iy) + (offset_x, offset_y), symb_info)
+                    coord + (ix, 1-iy) + (offset_x, offset_y), symb_info)
 
     def __get_image_offset(self, x: int, y: int) -> Vector2:
 

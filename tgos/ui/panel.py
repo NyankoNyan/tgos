@@ -16,15 +16,27 @@ class Panel(Element):
     def draw(self, draw_callback) -> None:
         if self.border_spite is not None:
             self.border_spite.resize = self.rect.size
-            self.border_spite.draw(self.glpos.v2, draw_callback)
+            self.border_spite.draw(
+                self.glpos.v2 + self.rect.corner, draw_callback)
         super().draw(draw_callback)
+
+    def get_inner_rect(self, local_space) -> Rect:
+        if self.border_spite is None or self.border_spite.borders is None:
+            result = self.rect
+        else:
+            borders = self.border_spite.borders
+            result = Rect(self.rect.x + borders.l,
+                          self.rect.y + borders.b,
+                          self.rect.width - borders.l - borders.r,
+                          self.rect.height - borders.b - borders.t)
+        if not local_space:
+            result.corner += self.glpos.v2
+        return result
 
     @property
     def inside(self) -> Rect:
-        if self.border_spite is None or self.border_spite.borders is None:
-            return self.rect
-        else:
-            borders = self.border_spite.borders
-            return Rect(borders.l, borders.b,
-                        self.rect.width - borders.l - borders.r,
-                        self.rect.height - borders.b - borders.t)
+        return self.get_inner_rect(False)
+
+    @property
+    def local_inside(self) -> Rect:
+        return self.get_inner_rect(True)
