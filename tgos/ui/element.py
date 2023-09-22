@@ -9,8 +9,9 @@ class Element(SceneObject):
     def __init__(self,
                  rect: Rect = Rect(0, 0, 1, 1),
                  parent: SceneObject = None,
-                 rc_target: bool = True) -> None:
-        super().__init__(parent=parent, draw_in_hier=True)
+                 rc_target: bool = True,
+                 shader=None) -> None:
+        super().__init__(parent=parent, draw_in_hier=True, shader=shader)
         self.rect = rect
         self.rc_target = rc_target
 

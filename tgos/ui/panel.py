@@ -1,3 +1,4 @@
+from ..screen import DrawCallback, Shader
 from .element import Element
 from ..sceneobject import SceneObject
 from ..common_types import Rect
@@ -9,15 +10,16 @@ class Panel(Element):
                  rect: Rect = Rect(1, 1, 1, 1),
                  parent: SceneObject = None,
                  rc_target: bool = True,
-                 border_sprite: Sprite = None) -> None:
-        super().__init__(rect=rect, parent=parent, rc_target=rc_target)
+                 border_sprite: Sprite = None,
+                 shader=None) -> None:
+        super().__init__(rect=rect, parent=parent, rc_target=rc_target, shader=shader)
         self.border_spite = border_sprite
 
-    def draw(self, draw_callback) -> None:
+    def draw(self, draw_callback: DrawCallback) -> None:
         if self.border_spite is not None:
             self.border_spite.resize = self.rect.size
             self.border_spite.draw(
-                self.glpos.v2 + self.rect.corner, draw_callback)
+                self.glpos.v2 + self.rect.corner, draw_callback, self.shader)
         super().draw(draw_callback)
 
     def get_inner_rect(self, local_space) -> Rect:

@@ -1,7 +1,9 @@
 from __future__ import annotations
 import math
+
+from .screen import DrawCallback
 from .image import Image
-from .common_types import Borders, Rect, Vector2
+from .common_types import Borders, Vector2
 
 
 class Sprite(object):
@@ -39,18 +41,18 @@ class Sprite(object):
                 (symbAnchor.y - 1)/(size.y - 1) if size.y > 1 else .5)
         self.size = size
 
-    def draw(self, coord: Vector2, draw_callback) -> None:
+    def draw(self, coord: Vector2, draw_callback: DrawCallback, shader=None) -> None:
         offset_x = -self.anchor.x * (self.size.x - 1)
         offset_y = (1 - self.anchor.y) * (self.size.y - 1)
         for ix in range(self.size.x):
             for iy in range(self.size.y):
                 img_ofs = self.__get_image_offset(ix, iy)
                 symb_info = self.image.get_char(img_ofs.x, img_ofs.y)
-                draw_callback(
-                    coord + (ix, 1-iy) + (offset_x, offset_y), symb_info)
+                draw_callback(coord + (ix, 1-iy) + (offset_x, offset_y),
+                              symb_info,
+                              shader)
 
     def __get_image_offset(self, x: int, y: int) -> Vector2:
-
         if self.borders is not None:
             if x < self.borders.l:
                 img_x = x

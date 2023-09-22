@@ -1,4 +1,7 @@
 from __future__ import annotations
+from typing import Callable
+
+from tgos.image import SymbolInfo
 from .common_types import Vector2
 from . import color
 import curses
@@ -107,3 +110,10 @@ class Screen(object):
 
     def mirror_coord(self, coord: Vector2) -> Vector2:
         return Vector2(coord.x, self.scr_size.y - coord.y)
+    
+class DrawContext(object):
+    def __init__(self, screen: Screen) -> None:
+        self.screen = screen
+
+Shader = Callable[[Vector2, SymbolInfo, DrawContext], None]
+DrawCallback = Callable[[Vector2, SymbolInfo, Shader, bool], None]

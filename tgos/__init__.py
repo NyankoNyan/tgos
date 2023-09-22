@@ -18,5 +18,6 @@ from .particlesystem import *
 from .tilebuilder import TileBuilder
 from .camera import Camera
 from .ui import *
-from .screen import Screen
+from .screen import Screen, DrawContext, DrawCallback, Shader
 from . import support, mouse
+

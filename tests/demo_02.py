@@ -1,4 +1,5 @@
 from tgos import *
+from tgos.appcontext import AppContext
 
 
 class DemoContext(AppContext):
@@ -26,6 +27,9 @@ class DemoContext(AppContext):
 
 
 class DemoApp(App):
+    def __init__(self, context_class: AppContext) -> None:
+        super().__init__(context_class, mock_mode=False)
+
     def _user_update(self):
         scr_size = self.context.scr.scr_size
         self.context.snow.emit_zone.rect = Rect(

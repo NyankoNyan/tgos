@@ -1,4 +1,8 @@
 from __future__ import annotations
+from typing import Callable
+
+from tgos.screen import DrawCallback, Shader
+from .image import SymbolInfo
 from .sprite import Sprite
 from .common_types import Vector3
 import tgos.appcontext
@@ -6,13 +10,14 @@ import tgos.appcontext
 
 class SceneObject(object):
     __slots__ = ["sprite", "coord", "context",
-                 "__parent", "__children", "active", "draw_in_hier"]
+                 "__parent", "__children", "active", "draw_in_hier", "shader"]
 
     def __init__(self,
                  sprite: Sprite = None,
                  coord: Vector3 = Vector3(0, 0, 0),
                  parent: SceneObject = None,
-                 draw_in_hier: bool = False) -> None:
+                 draw_in_hier: bool = False,
+                 shader: Callable[[list, SymbolInfo], None] = None) -> None:
         self.sprite = sprite
         self.coord = coord
         self.context: tgos.appcontext.AppContext = None
@@ -21,10 +26,11 @@ class SceneObject(object):
         self.parent = parent
         self.active = True
         self.draw_in_hier = draw_in_hier
+        self.shader = shader
 
-    def draw(self, draw_callback) -> None:
+    def draw(self, draw_callback:DrawCallback) -> None:
         if self.sprite is not None:
-            self.sprite.draw(self.glpos.v2, draw_callback)
+            self.sprite.draw(self.glpos.v2, draw_callback, self.shader)
         for ch in self.__children:
             if ch.draw_in_hier:
                 ch.draw(draw_callback)

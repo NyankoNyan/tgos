@@ -1,5 +1,4 @@
 from __future__ import annotations
-import math
 from . import vectors
 
 Vector2 = vectors.V2

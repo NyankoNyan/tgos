@@ -3,6 +3,7 @@ import math
 import random
 
 from tgos.common_types import Vector2
+from tgos.screen import DrawCallback
 from .sceneobject import SceneObject
 from .common_types import Rect, Vector2, Vector3
 from . import color
@@ -39,15 +40,17 @@ class EmitAction(object):
 
 class EmitZone(object):
     """Базовый объект для зон испускания частиц."""
+
     def get_emit(self) -> (Vector2, Vector2):
         raise Exception()
 
 
 class RectEmitZone(EmitZone):
     """Прямоугольная зона испускания частиц.
-    
+
     Все частицы будут лететь параллельно в заданном направлении.
     """
+
     def __init__(self, rect: Rect, dir: Vector2) -> None:
         self.rect = rect
         self.dir = dir.normalized
@@ -62,7 +65,7 @@ class RectEmitZone(EmitZone):
 
 class RoundEmitZone(EmitZone):
     """Круговая зона испускания частиц.
-    
+
     Можно указать радиус зоны испускания. Частицы распределяются неравномерно. 
     Ближе к центру они будут распределены плотнее.
 
@@ -70,6 +73,7 @@ class RoundEmitZone(EmitZone):
 
     Можно изменить скорость вылета частиц по разным осям с помощью параметра ellipse_mod.
     """
+
     def __init__(self,
                  center: Vector2 = Vector2(0, 0),
                  radius: float = 0,
@@ -116,8 +120,9 @@ class ParticleSystem(SceneObject):
 
     emit_actions - список порционных испусканий частиц. Время испускания привязано в времени цикла
     """
+
     def __init__(self,
-                 ch: str, 
+                 ch: str,
                  emit_zone: EmitZone,
                  coord: Vector3 = Vector3(0, 0, 0),
                  p_life_time: float = 1,
@@ -211,7 +216,7 @@ class ParticleSystem(SceneObject):
                 fnd.speed = dir * support.evaluate(self.speed)
                 fnd.death_time = self.__time + self.p_life_time
 
-    def draw(self, draw_callback) -> None:
+    def draw(self, draw_callback: DrawCallback) -> None:
         if self.life_time is not None and self.remain <= 0:
             return
         for p in self.__particles:
