@@ -109,11 +109,13 @@ class Screen(object):
             return curses.COLOR_BLACK
 
     def mirror_coord(self, coord: Vector2) -> Vector2:
-        return Vector2(coord.x, self.scr_size.y - coord.y)
-    
+        return Vector2(coord.x, self.scr_size.y - coord.y - 1)
+
+
 class DrawContext(object):
     def __init__(self, screen: Screen) -> None:
         self.screen = screen
+
 
 Shader = Callable[[Vector2, SymbolInfo, DrawContext], None]
 DrawCallback = Callable[[Vector2, SymbolInfo, Shader, bool], None]

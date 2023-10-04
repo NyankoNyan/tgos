@@ -1,3 +1,4 @@
+from tgos.screen import DrawCallback
 from ..image import SymbolInfo
 from .element import Element
 from ..common_types import Vector2, Rect
@@ -19,7 +20,7 @@ class Label(Element):
         self.color = color
         self.bg_color = bg_color
 
-    def draw(self, draw_callback):
+    def draw(self, draw_callback: DrawCallback, shader=None):
         for i, ch in enumerate(self.__text):
             if self.bg_color is not None:
                 si = SymbolInfo(symbol=ch,
@@ -29,7 +30,7 @@ class Label(Element):
             else:
                 si = SymbolInfo(symbol=ch,
                                 color=self.color)
-            draw_callback(self.glpos + (i, 0), si, True)
+            draw_callback(self.glpos.v2 + self.rect.corner + (i, 0), si, shader, True)
         super().draw(draw_callback)
 
     def on_click(self):

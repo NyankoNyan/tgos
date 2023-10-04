@@ -10,6 +10,7 @@ from tgos.sprite import Sprite
 
 MOCK_DEBUG = False
 
+
 class ClickState(object):
     def __init__(self, btn: int, event: int, coord: Vector2) -> None:
         self.btn = btn
@@ -73,11 +74,14 @@ def border_shader(coord: Vector2, symb: SymbolInfo, context: DrawContext):
 
 class ImageWindow(Panel):
     def __init__(self) -> None:
-        super().__init__(rect=Rect(0, 0, 10, 10), rc_target=True, border_sprite=borders.thick, shader=border_shader)
+        super().__init__(rect=Rect(0, 0, 10, 10), rc_target=True,
+                         border_sprite=borders.thick, shader=border_shader)
         self.__image: Image = None
         self.__sprite: Sprite = None
         self.__click_state: ClickState = None
         self.__selected: Vector2 = None
+        self.__debug_info = True
+        self.__debug_obj: Label = None
         self.larrow = SymbolInfo(symbol='>', color=color.RED)
         self.tarrow = SymbolInfo(symbol='v', color=color.RED)
 
@@ -106,10 +110,12 @@ class ImageWindow(Panel):
     def __get_image_rect(self) -> Rect:
         inner_rect = self.inside
         img_size = self.__sprite.image.size
-        return Rect(inner_rect.x, inner_rect.height - img_size.y + 2, img_size.x, img_size.y)
+        return Rect(inner_rect.x, inner_rect.y + inner_rect.height - img_size.y, img_size.x, img_size.y)
 
     def start(self):
-        pass
+        if self.__debug_info:
+            self.__debug_obj = self.context.instaniate(
+                Label(parent=self))
 
     def tick(self, delta):
         if self.__click_state is not None:
@@ -119,6 +125,13 @@ class ImageWindow(Panel):
                     and img_rect.y <= sel.y < img_rect.y + img_rect.height):
                 self.__selected = sel - img_rect.corner
             self.__click_state = None
+        if self.__debug_info:
+            if self.__selected:
+                img_rect = self.__get_image_rect()
+                self.__debug_obj.text = str(img_rect)
+            else:
+                self.__debug_obj.text = ""
+            self.__debug_obj.rect.corner = self.rect.corner + (1, 1)
 
     @property
     def image(self):
@@ -140,14 +153,16 @@ class ImageWindow(Panel):
 
 class ToolsWindow(Panel):
     def __init__(self) -> None:
-        super().__init__(rect=Rect(0, 0, 10, 10), rc_target=True, border_sprite=borders.thick, shader=border_shader)
+        super().__init__(rect=Rect(0, 0, 10, 10), rc_target=True,
+                         border_sprite=borders.thick, shader=border_shader)
 
 
 class TextCommandWindow(Panel):
     SYMB = range(0x20, 0x7f)
 
     def __init__(self) -> None:
-        super().__init__(rect=Rect(0, 0, 10, 10), rc_target=True, border_sprite=borders.thick, shader=border_shader)
+        super().__init__(rect=Rect(0, 0, 10, 10), rc_target=True,
+                         border_sprite=borders.thick, shader=border_shader)
         self.__focused = False
         self.__text_line: Label = None
         self.__text = ""
@@ -209,7 +224,7 @@ class ImageEditorContext(AppContext):
 
 class ImageEditorApp(App):
     CMD_WINDOW_HEIGHT = 4
-    TOOL_WINDOW_WIDTH = 10
+    TOOL_WINDOW_WIDTH = 20
 
     def __init__(self, contextClass: AppContext) -> None:
         super().__init__(contextClass, mock_mode=MOCK_DEBUG)

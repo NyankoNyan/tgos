@@ -48,7 +48,7 @@ class Sprite(object):
             for iy in range(self.size.y):
                 img_ofs = self.__get_image_offset(ix, iy)
                 symb_info = self.image.get_char(img_ofs.x, img_ofs.y)
-                draw_callback(coord + (ix, 1-iy) + (offset_x, offset_y),
+                draw_callback(coord + (ix, -iy) + (offset_x, offset_y),
                               symb_info,
                               shader)
 

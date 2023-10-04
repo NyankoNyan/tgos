@@ -32,6 +32,9 @@ class Rect(object):
         self.width = value.x
         self.height = value.y
 
+    def __str__(self) -> str:
+        return f"{{corner:{self.corner}, size:{self.size}}}"
+
 
 class Borders(object):
     __slots__ = ["l", "r", "t", "b"]

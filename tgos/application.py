@@ -115,10 +115,13 @@ class App(object):
                 context.scr.scr_size = Vector2(cols, rows)
 
             if context.key == curses.KEY_MOUSE:
-                _, mx, my, _, mstate = curses.getmouse()
-                context.mouse_btn = mouse.map_button(mstate)
-                context.mouse_event = mouse.map_event(mstate)
-                context.mouse_coord = Vector2(mx, context.scr.scr_size.y - my)
+                try:
+                    _, mx, my, _, mstate = curses.getmouse()
+                    context.mouse_btn = mouse.map_button(mstate)
+                    context.mouse_event = mouse.map_event(mstate)
+                    context.mouse_coord = Vector2(mx, context.scr.scr_size.y - my - 1)
+                except:
+                    pass
             else:
                 context.mouse_btn = 0
                 context.mouse_event = 0
@@ -181,11 +184,11 @@ class App(object):
                 scr_coord = self.__camera_offset + coord
 
             if symb_shader is None:
-                shader = self.__draw_symbol
+                shader = self._draw_symbol
             else:
                 shader = symb_shader
             shader(Vector2(math.floor(scr_coord.x),
-                           math.floor(context.scr.scr_size.y - scr_coord.y)),
+                           math.floor(context.scr.scr_size.y - scr_coord.y - 1)),
                    symb_info,
                    draw_context)
 
@@ -210,7 +213,7 @@ class App(object):
             if go.active and (go.parent is None or not go.draw_in_hier):
                 go.draw(draw_callback)
 
-    def __draw_symbol(self, coord: Vector2, symb_info: SymbolInfo, draw_context: DrawContext) -> None:
+    def _draw_symbol(self, coord: Vector2, symb_info: SymbolInfo, draw_context: DrawContext) -> None:
         """
         Распихивает графический символ по буферам. 
         Если для символа установлен прозрачный фон, будет использован фон с текущей позиции вывода.
@@ -245,4 +248,4 @@ class App(object):
         for ix in range(sprite.size_x):
             for iy in range(sprite.size_y):
                 symb_info = sprite.get_char(ix, iy)
-                self.__draw_symbol(coord + (ix, iy), symb_info)
+                self._draw_symbol(coord + (ix, iy), symb_info)

@@ -4,6 +4,7 @@ import curses
 def main(stdscr):
     curses.start_color()
     curses.use_default_colors()
+    
     try:
         for i in range(0, 256):
             curses.init_pair(i, i, 0)
