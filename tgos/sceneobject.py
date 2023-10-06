@@ -28,9 +28,12 @@ class SceneObject(object):
         self.draw_in_hier = draw_in_hier
         self.shader = shader
 
-    def draw(self, draw_callback:DrawCallback) -> None:
+    def draw(self, draw_callback: DrawCallback) -> None:
         if self.sprite is not None:
             self.sprite.draw(self.glpos.v2, draw_callback, self.shader)
+        self._draw_children(draw_callback)
+
+    def _draw_children(self, draw_callback: DrawCallback) -> None:
         for ch in self.__children:
             if ch.draw_in_hier:
                 ch.draw(draw_callback)

@@ -6,6 +6,8 @@ from ..sprite import Sprite
 
 
 class Panel(Element):
+    __slots__ = ["border_sprite"]
+
     def __init__(self,
                  rect: Rect = Rect(1, 1, 1, 1),
                  parent: SceneObject = None,

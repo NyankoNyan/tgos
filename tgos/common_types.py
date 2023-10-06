@@ -1,5 +1,6 @@
 from __future__ import annotations
 from . import vectors
+from copy import copy
 
 Vector2 = vectors.V2
 Vector3 = vectors.V3
@@ -34,6 +35,24 @@ class Rect(object):
 
     def __str__(self) -> str:
         return f"{{corner:{self.corner}, size:{self.size}}}"
+
+    def snap_to(self, target: Rect, top: int = None, bottom: int = None, left: int = None, right: int = None) -> Rect:
+        result = copy(self)
+        if bottom is not None:
+            result.y = target.y + bottom
+            if top is not None:
+                result.height = target.height - top - bottom
+        elif top is not None:
+            result.y = target.y + target.height - self.height - top
+
+        if left is not None:
+            result.x = target.x + left
+            if right is not None:
+                result.width = target.width - left - right
+        elif right is not None:
+            result.x = target.x + target.width - self.width - right
+
+        return result
 
 
 class Borders(object):

@@ -3,8 +3,15 @@ from ..sceneobject import SceneObject
 from ..common_types import Rect, Vector2, Vector3
 
 
+class ClickState(object):
+    def __init__(self, btn: int, event: int, coord: Vector2) -> None:
+        self.btn = btn
+        self.event = event
+        self.coord = coord
+
+
 class Element(SceneObject):
-    __slots__ = ["rect", "rc_target"]
+    __slots__ = ["rect", "rc_target", "click_state"]
 
     def __init__(self,
                  rect: Rect = Rect(0, 0, 1, 1),
@@ -14,9 +21,12 @@ class Element(SceneObject):
         super().__init__(parent=parent, draw_in_hier=True, shader=shader)
         self.rect = rect
         self.rc_target = rc_target
+        self.click_state: ClickState = None
 
     def on_click(self) -> None:
-        pass
+        context = self.context
+        self.click_state = ClickState(
+            context.mouse_btn, context.mouse_event, context.mouse_coord - self.glpos.v2)
 
     def search_raycast(self, pos: Vector2) -> Element:
         for ch in self.children:

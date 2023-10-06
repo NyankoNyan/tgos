@@ -1,160 +1,76 @@
 from __future__ import annotations
 import curses
+from image_editor.palette_panel import PalettePanel
+from image_editor.border_shader import border_shader
+from image_editor.image_window import ImageWindow
 from tgos import *
 from ascii_sprites import borders
 from tgos.appcontext import AppContext
 from tgos.common_types import Rect
 from ascii_sprites.actors import images as hero_img
 from tgos.sceneobject import SceneObject
-from tgos.sprite import Sprite
+from tgos.screen import DrawCallback
 
 MOCK_DEBUG = False
 
 
-class ClickState(object):
-    def __init__(self, btn: int, event: int, coord: Vector2) -> None:
-        self.btn = btn
-        self.event = event
-        self.coord = coord
+class ToolsWindow(Panel):
+    HPADDING = 1
+    VPADDING = 0
+    HORIZONTAL_SPACE = 1
+    VERTICAL_SPACE = 1
 
-
-def border_weights_calc(ch: str) -> list[int, int, int, int]:
-    idx = [0, 0, 0, 0]
-    if ch in "│┤╡╛└┴├┼╞╧╘╪┘":
-        idx[0] = 1
-    elif ch in "╢╣║╝╜╟╚╩╠╬╨╙╫":
-        idx[0] = 2
-    if ch in "└┴┬├─┼╟╨╥╙╓╫┌":
-        idx[1] = 1
-    elif ch in "╞╚╔╩╦╠═╬╧╤╘╒╪":
-        idx[1] = 2
-    if ch in "│┤╡╕┐┬├┼╞╤╒╪┌":
-        idx[2] = 1
-    elif ch in "╢╖╣║╗╟╔╦╠╬╥╓╫":
-        idx[2] = 2
-    if ch in "┤╢╖╜┐┴┬─┼╨╥╫┘":
-        idx[3] = 1
-    elif ch in "╡╕╣╗╝╛╩╦═╬╧╤╪":
-        idx[3] = 2
-    return idx
-
-
-def weight_index(l: list) -> int:
-    return (l[0] << 6) | (l[1] << 4) | (l[2] << 2) | l[3]
-
-
-border_lines = "│┤╡╢╖╕╣║╗╝╜╛┐└┴┬├─┼╞╟╚╔╩╦╠═╬╧╨╤╥╙╘╒╓╫╪┘┌"
-border_weights = {weight_index(border_weights_calc(e)): e
-                  for e in border_lines}
-
-
-def border_shader(coord: Vector2, symb: SymbolInfo, context: DrawContext):
-    scr = context.screen
-    sb = scr.symbol_buffer
-    if not (0 <= coord.x < scr.scr_size.x
-            and 0 <= coord.y < scr.scr_size.y):
-        return
-    curr_symb = symb.symbol
-    flat_coord = coord.y * scr.scr_size.x + coord.x
-    if curr_symb in border_lines:
-        symb2 = sb[flat_coord]
-        if symb2 in border_lines:
-            target_weights = [max(e[0], e[1])
-                              for e in zip(border_weights_calc(curr_symb),
-                                           border_weights_calc(symb2))]
-            try:
-                curr_symb = border_weights[weight_index(target_weights)]
-            except:
-                pass
-    if curr_symb != " ":
-        sb[flat_coord] = curr_symb
-        if not symb.bg_alpha:
-            scr.bg_color_buffer[flat_coord] = symb.bg_color
-
-
-class ImageWindow(Panel):
     def __init__(self) -> None:
         super().__init__(rect=Rect(0, 0, 10, 10), rc_target=True,
                          border_sprite=borders.thick, shader=border_shader)
-        self.__image: Image = None
-        self.__sprite: Sprite = None
-        self.__click_state: ClickState = None
-        self.__selected: Vector2 = None
-        self.__debug_info = True
-        self.__debug_obj: Label = None
-        self.larrow = SymbolInfo(symbol='>', color=color.RED)
-        self.tarrow = SymbolInfo(symbol='v', color=color.RED)
+        self.__palette = "░▒▓│┤╡╢╖╕╣║╗╝╜╛┐└┴┬├─┼╞╟╚╔╩╦╠═╬╧╨╤╥╙╘╒╓╫╪┘┌█▄▌▐▀▁▂▃▄▅▆▇█▉▊▋▌▍▎▏▐▔▕▖▗▘▙▚▛▜▝▞▟"
+        self.palette_panel: PalettePanel = None
 
-    def draw(self, draw_callback: DrawCallback):
-        # Draw panel with borders
+    def draw(self, draw_callback: DrawCallback) -> None:
         super().draw(draw_callback)
-        # Draw sprite
-        if self.__sprite is not None:
-            inner_rect = self.inside
-            top_left_corner = self.glpos.v2 + \
-                (0, inner_rect.height - 1) + inner_rect.corner
-            self.__sprite.draw(top_left_corner, draw_callback)
-        if self.__selected:
-            img_rect = self.__get_image_rect()
-            # Draw selected part
-            self.context.scr.set_intense(
-                self.glpos.v2 + img_rect.corner + self.__selected, color.HIGH_INTENSE)
-            # Draw navigation arrows over borders
-            draw_callback(self.glpos.v2 + Vector2(img_rect.x - 1,
-                                                  img_rect.y + self.__selected.y),
-                          self.larrow)
-            draw_callback(self.glpos.v2 + Vector2(img_rect.x + self.__selected.x,
-                                                  img_rect.y + img_rect.height),
-                          self.tarrow)
 
-    def __get_image_rect(self) -> Rect:
+    def _draw_children(self, draw_callback: DrawCallback) -> None:
         inner_rect = self.inside
-        img_size = self.__sprite.image.size
-        return Rect(inner_rect.x, inner_rect.y + inner_rect.height - img_size.y, img_size.x, img_size.y)
+        self.palette_panel.rect = self.palette_panel.rect.snap_to(
+            inner_rect, left=self.HPADDING, right=self.HPADDING)
+        self.palette_panel.update_height()
+        self.palette_panel.rect = self.palette_panel.rect.snap_to(
+            inner_rect, top=self.VPADDING)
+        self.palette_panel.draw(draw_callback)
+
+    def tick(self, delta: float) -> None:
+        if self.click_state is not None:
+            if self.click_state.btn == mouse.LBUTTON:
+                pass
+            self.click_state = None
+
+    def is_symbol_select(self) -> bool:
+        return self.palette_panel.is_symbol_select()
+
+    def get_symbol(self) -> str:
+        return self.palette_panel.get_symbol()
 
     def start(self):
-        if self.__debug_info:
-            self.__debug_obj = self.context.instaniate(
-                Label(parent=self))
-
-    def tick(self, delta):
-        if self.__click_state is not None:
-            sel = self.__click_state.coord
-            img_rect = self.__get_image_rect()
-            if (img_rect.x <= sel.x < img_rect.x + img_rect.width
-                    and img_rect.y <= sel.y < img_rect.y + img_rect.height):
-                self.__selected = sel - img_rect.corner
-            self.__click_state = None
-        if self.__debug_info:
-            if self.__selected:
-                img_rect = self.__get_image_rect()
-                self.__debug_obj.text = str(img_rect)
-            else:
-                self.__debug_obj.text = ""
-            self.__debug_obj.rect.corner = self.rect.corner + (1, 1)
-
-    @property
-    def image(self):
-        return self.__image
-
-    @image.setter
-    def image(self, v):
-        self.__image = v
-        if self.__image is None:
-            self.__sprite = None
-        else:
-            self.__sprite = Sprite(image=self.__image, anchor=Vector2(0, 1))
-
-    def on_click(self):
-        context = self.context
-        self.__click_state = ClickState(
-            context.mouse_btn, context.mouse_event, context.mouse_coord - self.glpos.v2)
+        self.palette_panel = self.context.instaniate(
+            PalettePanel(self, self.__palette))
 
 
-class ToolsWindow(Panel):
-    def __init__(self) -> None:
-        super().__init__(rect=Rect(0, 0, 10, 10), rc_target=True,
-                         border_sprite=borders.thick, shader=border_shader)
+class ColorPickPanel(Panel):
+    def __init__(self, parent: SceneObject = None, caption: str = "") -> None:
+        super().__init__(rect=Rect(1, 1, 1, 3), parent=parent, rc_target=True)
+        self.__caption_text = caption
+        self.__caption_obj: Label = None
+
+    def tick(self, delta: float) -> None:
+        if self.click_state is not None:
+            self.click_state = None
+
+    def start(self):
+        self.__caption_obj = self.context.instaniate(
+            Label(text=self.__caption, parent=self))
+
+    def draw(self, draw_callback: DrawCallback) -> None:
+        super().draw(draw_callback)
 
 
 class TextCommandWindow(Panel):
@@ -207,19 +123,6 @@ class ImageEditorContext(AppContext):
         self.current_focus = panel
         if self.current_focus is not None and hasattr(self.current_focus, "on_gain_focus"):
             self.current_focus.on_gain_focus()
-
-        # self.text_panel = self.instaniate(
-        #     Panel(rect=Rect(6, 6, 30, 10),
-        #           border_sprite=borders.thick))
-        # self.test_text = self.instaniate(
-        #     Label(text="Test text",
-        #           pos=Vector2(5, 9),
-        #           bg_color=color.RED,
-        #           parent=self.text_panel))
-        # self.sub_panel = self.instaniate(
-        #     Panel(rect=Rect(2, 1, 26, 8),
-        #           border_sprite=borders.flowers,
-        #           parent=self.text_panel))
 
 
 class ImageEditorApp(App):
