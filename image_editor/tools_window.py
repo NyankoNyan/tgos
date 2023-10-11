@@ -1,7 +1,8 @@
 from __future__ import annotations
 from typing import Callable
 from ascii_sprites import borders
-from .buttons_panel import ButtonsPanel
+from .flags_group import FlagsGroup
+from .main_mode_group import MainModeGroup
 from .color_pick_panel import ColorPickPanel
 from .border_shader import border_shader
 from .palette_panel import PalettePanel
@@ -18,7 +19,8 @@ class ToolsWindow(Panel):
     def __init__(self,
                  color_pick_callback: Callable[[str], None] = None,
                  bg_color_pick_callback: Callable[[str], None] = None,
-                 symb_pick_callback: Callable[[str], None] = None) -> None:
+                 symb_pick_callback: Callable[[str], None] = None,
+                 tool_pick_callback: Callable[[str, bool], None] = None) -> None:
         super().__init__(rect=Rect(0, 0, 10, 10),
                          rc_target=True,
                          border_sprite=borders.thick,
@@ -27,10 +29,12 @@ class ToolsWindow(Panel):
         self.palette_panel: PalettePanel = None
         self.color_panel: ColorPickPanel = None
         self.bg_color_panel: ColorPickPanel = None
-        self.buttons_group: ButtonsPanel = None
+        self.buttons_group: MainModeGroup = None
+        self.flags_group: FlagsGroup = None
         self.color_pick_callback = color_pick_callback
         self.bg_color_pick_callback = bg_color_pick_callback
         self.symb_pick_callback = symb_pick_callback
+        self.tool_pick_callback = tool_pick_callback
 
     def draw(self, draw_callback: DrawCallback) -> None:
         super().draw(draw_callback)
@@ -52,6 +56,7 @@ class ToolsWindow(Panel):
 
     def __update_children(self):
         self.__group_vecrtical([self.buttons_group,
+                                self.flags_group,
                                 self.palette_panel,
                                 self.color_panel,
                                 self.bg_color_panel])
@@ -62,13 +67,13 @@ class ToolsWindow(Panel):
         self.color_panel.draw(draw_callback)
         self.bg_color_panel.draw(draw_callback)
         self.buttons_group.draw(draw_callback)
+        self.flags_group.draw(draw_callback)
 
     def tick(self, delta: float) -> None:
         if self.click_state is not None:
             if self.click_state.btn == mouse.LBUTTON:
                 pass
             self.click_state = None
-        # self.__update_children()
 
     def is_symbol_select(self) -> bool:
         return self.palette_panel.is_symbol_select()
@@ -90,7 +95,10 @@ class ToolsWindow(Panel):
                            lambda x: self.__on_bg_color_pick(x))
         )
         self.buttons_group = self.context.instaniate(
-            ButtonsPanel(self, lambda x: self.__on_tool_pick(x))
+            MainModeGroup(self, lambda x, y: self.__on_tool_pick(x, y))
+        )
+        self.flags_group = self.context.instaniate(
+            FlagsGroup(self, self.__on_tool_pick)
         )
         self.color_panel.external_pick(color.WHITE)
         self.bg_color_panel.external_pick(color.BLACK)
@@ -109,5 +117,6 @@ class ToolsWindow(Panel):
         if self.symb_pick_callback is not None:
             self.symb_pick_callback(symb)
 
-    def __on_tool_pick(self, tool: str) -> None:
-        pass
+    def __on_tool_pick(self, tool: str, active: bool) -> None:
+        if self.tool_pick_callback is not None:
+            self.tool_pick_callback(tool, active)

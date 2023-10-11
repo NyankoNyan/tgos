@@ -27,10 +27,19 @@ def calc_layer_y_size(layer: list) -> int:
         return len(layer)
 
 
-def get_layer_char(layer: list, x: str, y: str) -> list:
+def get_layer_char(layer: list, x: str, y: str) -> list[bool, str]:
     if y < 0 or y >= len(layer):
         return (False, ' ')
     line = layer[y]
     if x < 0 or x >= len(line):
         return (False, ' ')
     return (True, line[x])
+
+
+def set_layer_char(layer: list, x: str, y: str, value: str) -> None:
+    if y < 0 or y >= len(layer):
+        return
+    line: str = layer[y]
+    if x < 0 or x >= len(line):
+        return
+    layer[y] = line[:x] + value + line[x+1:]

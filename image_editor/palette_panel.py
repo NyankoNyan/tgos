@@ -45,7 +45,7 @@ class PalettePanel(Panel):
         else:
             borders_offset = self.border_spite.borders.t + self.border_spite.borders.b
         self.rect.height = (self.VMARGIN * 2 + 1 + borders_offset +
-                            (len(self.palette) // elems_on_row - 1) * (self.VERTICAL_SPACE + 1))
+                            ((len(self.palette) - 1) // elems_on_row) * (self.VERTICAL_SPACE + 1))
 
     def __draw_palette(self, draw_callback: DrawCallback) -> None:
         inner_rect = self.inside
@@ -104,3 +104,13 @@ class PalettePanel(Panel):
 
     def get_symbol(self) -> str:
         return self.__palette[self.__selected_elem]
+
+    def external_pick(self, symb: str) -> None:
+        try:
+            index = self.palette.index(symb)
+        except ValueError:
+            self.palette = self.palette + symb
+            index = len(self.palette) - 1
+        self.__selected_elem = index
+        if self.pick_callback is not None:
+            self.pick_callback(symb)

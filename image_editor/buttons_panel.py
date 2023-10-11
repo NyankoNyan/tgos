@@ -7,29 +7,33 @@ from typing import Callable
 
 
 class ButtonsPanel(Panel):
-    DOTPAINT = "dotpaint"
-    LINEPAINT = "linepaint"
-    SQUAREPAINT = "squarepaint"
-    PICK = "pick"
+    __slots__ = ["buttons", "tool_pick_callback",
+                 "__picked", "_color", "_bg_color", "__btn_instances",
+                 "__click_mode", "__active"]
+
+    CLICK_SIGNAL = 0
+    CLICK_OPTION = 1
+    CLICK_FLAG = 2
+
     VSPACING = 0
     HSPACING = 1
 
     def __init__(self,
                  parent: SceneObject = None,
-                 tool_pick_callback: Callable[[str], None] = None) -> None:
+                 tool_pick_callback: Callable[[str, bool], None] = None,
+                 click_mode: int = 0) -> None:
         super().__init__(rect=Rect(0, 0, 1, 1), parent=parent, rc_target=True)
 
-        self.buttons = {
-            self.DOTPAINT: "DOT",
-            self.LINEPAINT: "LIN",
-            self.SQUAREPAINT: "SQR",
-            self.PICK: "PCK",
-        }
+        self.buttons: dict[str, str] = {}
         self.tool_pick_callback = tool_pick_callback
         self.__picked = None
-        self.__color = color.WHITE
-        self.__bg_color = color.BLUE
+        self.__active: dict[str, bool] = {}
+        self._color = color.WHITE
+        self._bg_color = color.BLUE
+        self._color_selected = color.BLUE
+        self._bg_color_selected = color.WHITE
         self.__btn_instances: dict = {}
+        self.__click_mode = click_mode
 
     def start(self):
         # Add buttons
@@ -39,8 +43,8 @@ class ButtonsPanel(Panel):
                 text=self.buttons[btn_key],
                 parent=self,
                 rc_target=True,
-                color=self.__color,
-                bg_color=self.__bg_color)
+                color=self._color,
+                bg_color=self._bg_color)
 
             self.context.instaniate(btn)
             btn.click_callback = lambda x: self.__on_tool_pick(btn_key)
@@ -50,17 +54,39 @@ class ButtonsPanel(Panel):
             self.__btn_instances[btn_key] = btn
 
     def __on_tool_pick(self, tool: str):
-        if self.__picked is not None:
-            btn: Label = self.__btn_instances[self.__picked]
-            btn.color = self.__color
-            btn.bg_color = self.__bg_color
-        self.__picked = tool
-        btn: Label = self.__btn_instances[tool]
-        btn.color = self.__bg_color
-        btn.bg_color = self.__color
+        if self.__click_mode == self.CLICK_OPTION:
 
-        if self.tool_pick_callback is not None:
-            self.tool_pick_callback(tool)
+            if self.__picked is not None:
+                btn: Label = self.__btn_instances[self.__picked]
+                btn.color = self._color
+                btn.bg_color = self._bg_color
+            self.__picked = tool
+            btn: Label = self.__btn_instances[tool]
+            btn.color = self._color_selected
+            btn.bg_color = self._bg_color_selected
+
+            if self.tool_pick_callback is not None:
+                self.tool_pick_callback(tool, True)
+
+        elif self.__click_mode == self.CLICK_FLAG:
+
+            try:
+                self.__active[tool] = not self.__active[tool]
+            except:
+                self.__active[tool] = True
+            btn: Label = self.__btn_instances[tool]
+            if self.__active[tool]:
+                btn.color = self._color_selected
+                btn.bg_color = self._bg_color_selected
+            else:
+                btn.color = self._color
+                btn.bg_color = self._bg_color
+
+            if self.tool_pick_callback is not None:
+                self.tool_pick_callback(tool, self.__active[tool])
+        else:
+            if self.tool_pick_callback is not None:
+                self.tool_pick_callback(tool, True)
 
     def update_height(self) -> None:
         offsets = self.__get_buttons_offsets()

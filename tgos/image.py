@@ -49,10 +49,13 @@ class Image(object):
         "color_layer",
         "bg_layer",
         "color_map",
+        "reverse_color_map",
         "default_color",
         "size_x",
         "size_y"
     ]
+
+    COLOR_SYMB_DEF = "0123456789qwertyuiopasdfghjklzxcvbnm"
 
     def __init__(self,
                  size_x: int = None,
@@ -69,6 +72,7 @@ class Image(object):
         self.color_layer = symbmap.raw_layer_to_list(color_layer)
         self.bg_layer = symbmap.raw_layer_to_list(bg_layer)
         self.color_map = color_map
+        self.reverse_color_map = {color_map[x]: x for x in color_map}
         self.default_color = default_color
 
         calculated_size_x = self._calc_x_size()
@@ -140,12 +144,42 @@ class Image(object):
 
         return SymbolInfo(alpha, symbol, color, bgalpha, bgcolor)
 
+    def set_char(self, x: int, y: int, info: SymbolInfo):
+        if info.alpha:
+            symbmap.set_layer_char(self.main_layer, x, y, ' ')
+        else:
+            symbmap.set_layer_char(self.main_layer, x, y, info.symbol)
+
+        if info.bg_alpha:
+            symbmap.set_layer_char(self.bg_layer, x, y, ' ')
+        else:
+            symbmap.set_layer_char(self.bg_layer, x, y,
+                                   self._map_color_reverse(info.bg_color))
+
+        symbmap.set_layer_char(self.color_layer, x, y,
+                               self._map_color_reverse(info.color))
+
     def _map_color(self, color: str) -> str:
         "Возвращает цвет движка по его символу. Если символ не известен, вернёт цвет по-умолчанию."
         try:
             return self.color_map[color]
         except:
             return self.default_color
+
+    def _map_color_reverse(self, color: str) -> str:
+        try:
+            return self.reverse_color_map[color]
+        except:
+            new_color = ' '
+            for ch in self.COLOR_SYMB_DEF:
+                try:
+                    _ = self.color_map[ch]
+                except:
+                    self.color_map[ch] = color
+                    self.reverse_color_map[color] = ch
+                    new_color = ch
+                    break
+            return new_color
 
     @staticmethod
     def apply(imgs: [str, 'Image'], color_map: [str, str] = None) -> [str, 'Image']:
@@ -158,3 +192,25 @@ class Image(object):
     @property
     def size(self):
         return Vector2(self.size_x, self.size_y)
+
+    def prepare_edit(self):
+        if self.bg_layer is None:
+            self.bg_layer = self.__empty_color_layer()
+        if self.color_layer is None:
+            self.color_layer = self.__empty_color_layer()
+
+        self.__prepare_layer_width(self.color_layer, self.size.x)
+        self.__prepare_layer_width(self.bg_layer, self.size.x)
+
+    def __empty_color_layer(self, fill: str = ' '):
+        layer = []
+        for y in range(self.size.y):
+            layer.append(fill*self.size.x)
+        return layer
+
+    def __prepare_layer_width(self, layer: list, width: int, fill: str = ' ') -> None:
+        for y in range(len(layer)):
+            line = layer[y]
+            curr_width = len(line)
+            if curr_width < width:
+                layer[y] = line + fill * (width-curr_width)
