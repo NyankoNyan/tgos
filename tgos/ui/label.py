@@ -33,9 +33,6 @@ class Label(Element):
             draw_callback(self.glpos.v2 + self.rect.corner + (i, 0), si, shader, True)
         super().draw(draw_callback)
 
-    def on_click(self):
-        pass
-
     @property
     def text(self):
         return self.__text

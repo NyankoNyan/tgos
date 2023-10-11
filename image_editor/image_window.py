@@ -1,9 +1,6 @@
 from ascii_sprites import borders
-from image_editor.border_shader import border_shader
+from .border_shader import border_shader
 from tgos import DrawCallback, Image, Panel, Rect, Sprite, SymbolInfo, Vector2, color
-from tgos.common_types import Rect
-from tgos.screen import DrawCallback
-from tgos.sprite import Sprite
 
 
 class ImageWindow(Panel):

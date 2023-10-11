@@ -1,6 +1,6 @@
 from __future__ import annotations
+from typing import Callable
 from tgos import DrawCallback, Panel, SymbolInfo, Vector2, color, mouse
-from tgos.screen import DrawCallback
 
 
 class PalettePanel(Panel):
@@ -8,16 +8,20 @@ class PalettePanel(Panel):
     """
     HMARGIN = 0
     VMARGIN = 0
-    HORIZONTAL_SPACE = 1
-    VERTICAL_SPACE = 1
+    HORIZONTAL_SPACE = 0
+    VERTICAL_SPACE = 0
 
-    def __init__(self, parent: Panel, palette: str) -> None:
+    def __init__(self,
+                 parent: Panel,
+                 palette: str,
+                 pick_callback: Callable[[str], None]) -> None:
         self.parent: Panel
         super().__init__(parent=parent, rc_target=True)
         self.color = color.WHITE
         self.bg_color = color.BLACK
         self.palette = palette
         self.__selected_elem = -1
+        self.pick_callback = pick_callback
 
     def tick(self, delta: float) -> None:
         if self.click_state is not None:
@@ -26,6 +30,8 @@ class PalettePanel(Panel):
                     self.click_state.coord.x, self.click_state.coord.y)
                 if sel_index >= 0:
                     self.__selected_elem = sel_index
+                    if self.pick_callback is not None:
+                        self.pick_callback(self.palette[self.__selected_elem])
             self.click_state = None
 
     def draw(self, draw_callback: DrawCallback) -> None:

@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import Callable
 from ..sceneobject import SceneObject
 from ..common_types import Rect, Vector2, Vector3
 
@@ -11,22 +12,26 @@ class ClickState(object):
 
 
 class Element(SceneObject):
-    __slots__ = ["rect", "rc_target", "click_state"]
+    __slots__ = ["rect", "rc_target", "click_state", "click_callback"]
 
     def __init__(self,
                  rect: Rect = Rect(0, 0, 1, 1),
                  parent: SceneObject = None,
                  rc_target: bool = True,
-                 shader=None) -> None:
+                 shader=None,
+                 click_callback: Callable[[ClickState], None] = None) -> None:
         super().__init__(parent=parent, draw_in_hier=True, shader=shader)
         self.rect = rect
         self.rc_target = rc_target
         self.click_state: ClickState = None
+        self.click_callback = click_callback
 
     def on_click(self) -> None:
         context = self.context
         self.click_state = ClickState(
             context.mouse_btn, context.mouse_event, context.mouse_coord - self.glpos.v2)
+        if self.click_callback is not None:
+            self.click_callback(self.click_state)
 
     def search_raycast(self, pos: Vector2) -> Element:
         for ch in self.children:
